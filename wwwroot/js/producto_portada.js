@@ -1,12 +1,24 @@
-const imagen = document.querySelector(".portada");
-const archivo = document.getElementById("ArchivoId");
+document.addEventListener("DOMContentLoaded", () => {
+    const imagen = document.querySelector(".portada");
+    const archivo = document.getElementById("ArchivoId");
 
-function CargaImagen() {
-
-    if (archivo.selectedIndex > 0) {
-        const path = imagen.dataset.url + "/api/archivos/" + archivo.options[archivo.selectedIndex].value;
-        imagen.src = path;
+    if (!imagen || !archivo) {
+        return;
     }
-}
 
-archivo.addEventListener("change", CargaImagen);
+    const urlWebApi = (imagen.dataset.url || "").replace(/\/$/, "");
+
+    function cargarImagen() {
+        const archivoId = archivo.value;
+
+        if (!archivoId) {
+            imagen.src = "/images/temp.png";
+            return;
+        }
+
+        imagen.src = `${urlWebApi}/api/archivos/${archivoId}`;
+    }
+
+    archivo.addEventListener("change", cargarImagen);
+    cargarImagen();
+});

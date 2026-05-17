@@ -12,7 +12,8 @@ public class ProductosController(
     ProductosClientService productos,
     CategoriasClientService categorias,
     ArchivosClientService archivos,
-    IConfiguration configuration) : Controller
+    IConfiguration configuration
+) : Controller
 {
     public async Task<IActionResult> Index(string? s)
     {
@@ -32,7 +33,8 @@ public class ProductosController(
             ViewBag.SoloAdmin = true;
 
         ViewBag.Url = configuration["UrlWebAPI"];
-        ViewBag.Search = s;
+        ViewBag.search = s;
+
         return View(lista);
     }
 
@@ -57,7 +59,9 @@ public class ProductosController(
 
     public async Task<IActionResult> Crear()
     {
+        ViewBag.Url = configuration["UrlWebAPI"];
         await ProductosDropDownListAsync();
+
         return View();
     }
 
@@ -80,8 +84,9 @@ public class ProductosController(
             }
         }
 
-        await ProductosDropDownListAsync();
+        await ProductosDropDownListAsync(itemToCreate.ArchivoId);
         ModelState.AddModelError("Nombre", "No ha sido posible realizar la acción. Inténtelo nuevamente.");
+
         return View(itemToCreate);
     }
 
@@ -101,7 +106,7 @@ public class ProductosController(
                 return RedirectToAction("Salir", "Auth");
         }
 
-        await ProductosDropDownListAsync();
+        await ProductosDropDownListAsync(itemToEdit.ArchivoId);
         return View(itemToEdit);
     }
 
@@ -126,8 +131,9 @@ public class ProductosController(
             }
         }
 
-        await ProductosDropDownListAsync();
+        await ProductosDropDownListAsync(itemToEdit.ArchivoId);
         ModelState.AddModelError("Nombre", "No ha sido posible realizar la acción. Inténtelo nuevamente.");
+
         return View(itemToEdit);
     }
 
@@ -150,6 +156,7 @@ public class ProductosController(
         }
 
         ViewBag.Url = configuration["UrlWebAPI"];
+
         return View(itemToDelete);
     }
 
@@ -172,7 +179,6 @@ public class ProductosController(
             }
         }
 
-        // En caso de error
         return RedirectToAction(nameof(Eliminar), new { id, showError = true });
     }
 
@@ -200,8 +206,9 @@ public class ProductosController(
                 return RedirectToAction("Salir", "Auth");
         }
 
-        ViewData["ProductoId"] = itemToView?.ProductoId;
+        ViewData["ProductoId"] = itemToView.ProductoId;
         ViewBag.Url = configuration["UrlWebAPI"];
+
         return View(itemToView);
     }
 
@@ -224,6 +231,7 @@ public class ProductosController(
         }
 
         ViewBag.Url = configuration["UrlWebAPI"];
+
         return View(itemToView);
     }
 
@@ -252,10 +260,10 @@ public class ProductosController(
             }
         }
 
-        // En caso de error
         ViewBag.Url = configuration["UrlWebAPI"];
         ModelState.AddModelError("id", "No ha sido posible realizar la acción. Inténtelo nuevamente.");
         await CategoriasDropDownListAsync();
+
         return View(new ProductoCategoria { Producto = producto });
     }
 
@@ -288,6 +296,7 @@ public class ProductosController(
         }
 
         ViewBag.Url = configuration["UrlWebAPI"];
+
         return View(itemToView);
     }
 
@@ -308,7 +317,6 @@ public class ProductosController(
             }
         }
 
-        // En caso de error
         return RedirectToAction(nameof(CategoriasRemover), new { id, categoriaid, showError = true });
     }
 
