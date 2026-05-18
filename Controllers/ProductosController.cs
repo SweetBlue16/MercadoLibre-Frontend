@@ -106,6 +106,8 @@ public class ProductosController(
                 return RedirectToAction("Salir", "Auth");
         }
 
+        if (itemToEdit == null) return View("Error");
+
         await ProductosDropDownListAsync(itemToEdit.ArchivoId);
         return View(itemToEdit);
     }
@@ -205,6 +207,8 @@ public class ProductosController(
             if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                 return RedirectToAction("Salir", "Auth");
         }
+
+        if (itemToView == null) return View("Error");
 
         ViewData["ProductoId"] = itemToView.ProductoId;
         ViewBag.Url = configuration["UrlWebAPI"];

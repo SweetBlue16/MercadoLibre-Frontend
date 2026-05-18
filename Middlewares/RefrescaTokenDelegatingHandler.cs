@@ -23,7 +23,7 @@ public class RefrescaTokenDelegatingHandler(AuthClientService auth, IHttpContext
                 new(ClaimTypes.Role, httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.Role)!),
             };
 
-            auth.IniciaSesionAsync(claims);
+            await auth.IniciaSesionAsync(claims);
         }
 
         return response;

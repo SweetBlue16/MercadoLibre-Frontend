@@ -1,3 +1,4 @@
+@model CarritoResumen
 @{
     ViewData["Title"] = "Carrito de compras";
     ViewData["SubTitle"] = "Listado";
@@ -5,14 +6,58 @@
 
 <h2 class="text-center mb-3">@ViewData["Title"] <small class="text-muted fs-5">@ViewData["SubTitle"]</small></h2>
 
+@if (TempData["Mensaje"] is string mensaje)
+{
+    <div class="alert alert-success">@mensaje</div>
+}
+
+@if (TempData["Error"] is string error)
+{
+    <div class="alert alert-danger">@error</div>
+}
+
+@if (ViewData["ErrorMessage"] is string errorMessage)
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
 <div class="row small mb-3">
+    <div class="col">
+        @if (Model.Items.Count > 0)
+        {
+            <form asp-action="Vaciar" method="post" class="d-inline">
+                <button type="submit" class="btn btn-sm btn-outline-danger">Vaciar carrito</button>
+            </form>
+        }
+    </div>
     <div class="col text-end">
-        Mostrando 0 elementos
+        Mostrando @Model.Items.Count elementos
     </div>
 </div>
 
-<div class="mt-5">
-    <div class="alert alert-warning" role="alert">
-        No se han encontrado elementos. Inténtelo de nuevo más tarde.
+@if (Model.Items.Count > 0)
+{
+    <div class="row g-3">
+        @foreach (var item in Model.Items)
+        {
+            <div class="col-12">
+                <partial name="_CardPartial" model="item" />
+            </div>
+        }
     </div>
-</div>
+
+    <div class="text-end mt-3">
+        <h5>Total: @Html.DisplayFor(model => model.Total)</h5>
+        <form asp-action="Confirmar" method="post">
+            <button type="submit" class="btn btn-primary">Confirmar compra</button>
+        </form>
+    </div>
+}
+else
+{
+    <div class="mt-5">
+        <div class="alert alert-warning" role="alert">
+            No se han encontrado elementos. Inténtelo de nuevo más tarde.
+        </div>
+    </div>
+}

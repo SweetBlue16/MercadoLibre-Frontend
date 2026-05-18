@@ -18,11 +18,25 @@ public class AuthClientService(HttpClient client, IHttpContextAccessor httpConte
         return token;
     }
 
-    public async void IniciaSesionAsync(List<Claim> claims)
+    public async Task<bool> RegistrarAsync(Registro registro)
+    {
+        var payload = new
+        {
+            registro.Email,
+            registro.Nombre,
+            registro.Password
+        };
+
+        var response = await client.PostAsJsonAsync("api/usuarios/registro", payload);
+        return response.IsSuccessStatusCode;
+    }
+
+    public async Task IniciaSesionAsync(List<Claim> claims)
     {
         var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
         var authProperties = new AuthenticationProperties();
 
-        await httpContextAccessor.HttpContext?.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties)!;
+        if (httpContextAccessor.HttpContext is not null)
+            await httpContextAccessor.HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
     }
 }

@@ -37,6 +37,8 @@
     </div>
 
     <div class="card-footer">
-        <a class="btn btn-primary btn-sm" href="#" role="button">Comprar</a>
+        <form asp-controller="Carrito" asp-action="Agregar" asp-route-id="@Model.ProductoId" method="post">
+            <button type="submit" class="btn btn-primary btn-sm">Agregar al carrito</button>
+        </form>
     </div>
 </div>

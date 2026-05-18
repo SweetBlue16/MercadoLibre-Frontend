@@ -6,7 +6,10 @@ public class EnviaBearerDelegatingHandler(IHttpContextAccessor httpContextAccess
 {
     protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        request.Headers.Add("Authorization", "Bearer " + httpContextAccessor.HttpContext?.User.FindFirstValue("jwt"));
+        var token = httpContextAccessor.HttpContext?.User.FindFirstValue("jwt");
+        if (!string.IsNullOrWhiteSpace(token))
+            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
         return base.SendAsync(request, cancellationToken);
     }
 }

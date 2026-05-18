@@ -16,6 +16,37 @@ public class AuthController(AuthClientService auth) : Controller
         return View();
     }
 
+    [AllowAnonymous]
+    public IActionResult Registro()
+    {
+        return View();
+    }
+
+    [HttpPost]
+    [AllowAnonymous]
+    public async Task<IActionResult> Registro(Registro model)
+    {
+        if (string.Equals(model.Email, model.Password, StringComparison.OrdinalIgnoreCase))
+            ModelState.AddModelError(nameof(model.Password), "La contraseña no puede ser igual al correo.");
+
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                var creado = await auth.RegistrarAsync(model);
+                if (creado)
+                    return RedirectToAction(nameof(Index));
+            }
+            catch (HttpRequestException)
+            {
+                ModelState.AddModelError(string.Empty, "No fue posible conectar con el API. Intente nuevamente.");
+            }
+        }
+
+        ModelState.AddModelError(nameof(model.Email), "No fue posible crear la cuenta. Revise los datos capturados.");
+        return View(model);
+    }
+
     [HttpPost]
     [AllowAnonymous]
     [ValidateAntiForgeryToken]
@@ -43,7 +74,7 @@ public class AuthController(AuthClientService auth) : Controller
                     new(ClaimTypes.Role, token.Rol),
                 };
 
-                auth.IniciaSesionAsync(claims);
+                await auth.IniciaSesionAsync(claims);
 
                 // Usuario válido
                 if (token.Rol == "Administrador")

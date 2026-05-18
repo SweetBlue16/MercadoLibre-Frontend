@@ -17,7 +17,7 @@ public class Producto
 
     [Required(ErrorMessage = "El campo {0} es obligatorio.")]
     [DataType(DataType.Currency)]
-    [RegularExpression(@"^\d+.\d{0,2}$", ErrorMessage = "El valor del campo debe ser un precio válido.")]
+    [RegularExpression(@"^\d+(\.\d{1,2})?$", ErrorMessage = "El valor del campo debe ser un precio válido.")]
     [DisplayFormat(DataFormatString = "{0:C}", ApplyFormatInEditMode = false)]
     [Display(Name = "Precio")]
     public decimal Precio { get; set; }

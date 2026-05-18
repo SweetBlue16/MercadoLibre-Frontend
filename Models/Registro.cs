@@ -2,12 +2,16 @@ using System.ComponentModel.DataAnnotations;
 
 namespace frontendnet.Models;
 
-public class UsuarioPwd
+public class Registro
 {
     [Required(ErrorMessage = "El campo {0} es obligatorio.")]
     [EmailAddress(ErrorMessage = "El campo {0} no es correo valido.")]
     [Display(Name = "Correo electronico")]
     public required string Email { get; set; }
+
+    [Required(ErrorMessage = "El campo {0} es obligatorio.")]
+    [Display(Name = "Nombre")]
+    public required string Nombre { get; set; }
 
     [Required(ErrorMessage = "El campo {0} es obligatorio.")]
     [MinLength(12, ErrorMessage = "El campo {0} debe tener un minimo de {1} caracteres.")]
@@ -18,8 +22,8 @@ public class UsuarioPwd
     public required string Password { get; set; }
 
     [Required(ErrorMessage = "El campo {0} es obligatorio.")]
-    public required string Nombre { get; set; }
-
-    [Required(ErrorMessage = "El campo {0} es obligatorio.")]
-    public required string Rol { get; set; }
+    [Compare(nameof(Password), ErrorMessage = "Las contraseñas no coinciden.")]
+    [DataType(DataType.Password)]
+    [Display(Name = "Confirmar contraseña")]
+    public required string ConfirmPassword { get; set; }
 }

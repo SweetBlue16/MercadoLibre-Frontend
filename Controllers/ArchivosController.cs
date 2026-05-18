@@ -57,13 +57,13 @@ public class ArchivosController(ArchivosClientService archivos, IConfiguration c
         {
             try
             {
-                if ((itemToCreate.Portada.Length / 1024) > 100)
+                if (itemToCreate.Portada.Length > 5 * 1024 * 1024)
                 {
                     ModelState.AddModelError("Portada", $"El archivo de {itemToCreate.Portada.Length / 1024} KB supera el tamprecio máximo permitido.");
                     return View(itemToCreate);
                 }
 
-                if (itemToCreate.Portada.ContentType != "image/jpeg")
+                if (!IsAllowedImage(itemToCreate.Portada.ContentType))
                 {
                     ModelState.AddModelError("Portada", $"El archivo {itemToCreate.Portada.FileName} no tiene una extensión permitida.");
                     return View(itemToCreate);
@@ -119,13 +119,13 @@ public class ArchivosController(ArchivosClientService archivos, IConfiguration c
         {
             try
             {
-                if ((itemToEdit.Portada.Length / 1024) > 100)
+                if (itemToEdit.Portada.Length > 5 * 1024 * 1024)
                 {
                     ModelState.AddModelError("Portada", $"El archivo de {itemToEdit.Portada.Length / 1024} KB supera el tamprecio máximo permitido.");
                     return View(itemToEdit);
                 }
 
-                if (itemToEdit.Portada.ContentType != "image/jpeg")
+                if (!IsAllowedImage(itemToEdit.Portada.ContentType))
                 {
                     ModelState.AddModelError("Portada", $"El archivo {itemToEdit.Portada.FileName} no tiene una extensión permitida.");
                     return View(itemToEdit);
@@ -187,5 +187,10 @@ public class ArchivosController(ArchivosClientService archivos, IConfiguration c
         }
 
         return RedirectToAction(nameof(Eliminar), new { id, showError = true });
+    }
+
+    private static bool IsAllowedImage(string contentType)
+    {
+        return contentType is "image/jpeg" or "image/png" or "image/webp";
     }
 }
