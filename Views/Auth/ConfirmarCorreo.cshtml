@@ -1,0 +1,45 @@
+@model ConfirmarCorreo
+@{
+    ViewData["Title"] = "Confirmar correo";
+}
+
+<form asp-action="ConfirmarCorreo">
+    <div class="card mx-auto" style="max-width: 520px;">
+        <div class="card-body">
+            <h1 class="h4 text-center">@ViewData["Title"]</h1>
+            @if (ViewData["Mensaje"] is string mensaje)
+            {
+                <div class="alert alert-info small">@mensaje</div>
+            }
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="form-floating mb-3">
+                @if (Model.EmailBloqueado)
+                {
+                    <input asp-for="Email" class="form-control" placeholder="Email" readonly>
+                    <input asp-for="EmailBloqueado" type="hidden" />
+                }
+                else
+                {
+                    <input asp-for="Email" class="form-control" placeholder="Email">
+                }
+                <label asp-for="Email" class="form-label"></label>
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input asp-for="Codigo" class="form-control" placeholder="Codigo">
+                <label asp-for="Codigo" class="form-label"></label>
+                <span asp-validation-for="Codigo" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="card-footer text-center">
+            <button type="submit" class="btn btn-primary">Confirmar</button>
+            <button type="submit" class="btn btn-outline-secondary" formaction="@Url.Action("ReenviarConfirmacion", "Auth")">Reenviar código</button>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

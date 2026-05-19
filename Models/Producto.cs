@@ -9,7 +9,7 @@ public class Producto
     public int? ProductoId { get; set; }
 
     [Required(ErrorMessage = "El campo {0} es obligatorio.")]
-    public required string Titulo { get; set; }
+    public string Titulo { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "El campo {0} es obligatorio.")]
     [DataType(DataType.MultilineText)]

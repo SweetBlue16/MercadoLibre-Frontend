@@ -1,5 +1,6 @@
 using System.Net.Http.Headers;
 using frontendnet.Models;
+using frontendnet.Services.Errors;
 
 namespace frontendnet.Services;
 
@@ -7,12 +8,12 @@ public class ArchivosClientService(HttpClient client)
 {
     public async Task<List<Archivo>?> GetAsync()
     {
-        return await client.GetFromJsonAsync<List<Archivo>>("api/archivos");
+        return await ApiErrorMapper.GetFromJsonAsync<List<Archivo>>(client, "api/archivos");
     }
 
     public async Task<Archivo?> GetAsync(int id)
     {
-        return await client.GetFromJsonAsync<Archivo>($"api/archivos/{id}/detalle");
+        return await ApiErrorMapper.GetFromJsonAsync<Archivo>(client, $"api/archivos/{id}/detalle");
     }
 
     public async Task PostAsync(Upload Archivo)
@@ -30,8 +31,7 @@ public class ArchivosClientService(HttpClient client)
             { fileContent, "file", Archivo.Portada.FileName! }
         };
 
-        var response = await client.PostAsync("api/archivos", form);
-        response.EnsureSuccessStatusCode();
+        await ApiErrorMapper.PostAsync(client, "api/archivos", form);
     }
 
     public async Task PutAsync(Upload Archivo)
@@ -49,13 +49,11 @@ public class ArchivosClientService(HttpClient client)
             { fileContent, "file", Archivo.Portada.FileName! }
         };
 
-        var response = await client.PutAsync($"api/archivos/{Archivo.ArchivoId}", form);
-        response.EnsureSuccessStatusCode();
+        await ApiErrorMapper.SendPutMultipartAsync(client, $"api/archivos/{Archivo.ArchivoId}", form);
     }
 
     public async Task DeleteAsync(int id)
     {
-        var response = await client.DeleteAsync($"api/archivos/{id}");
-        response.EnsureSuccessStatusCode();
+        await ApiErrorMapper.DeleteAsync(client, $"api/archivos/{id}");
     }
 }

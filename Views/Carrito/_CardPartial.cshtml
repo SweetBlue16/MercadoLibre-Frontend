@@ -1,15 +1,12 @@
 @model CarritoItem
 @{
-    var urlWebApi = (ViewBag.Url as string ?? string.Empty).TrimEnd('/');
-    var portadaUrl = Model.ArchivoId == null
-        ? Url.Content("~/images/temp.png")
-        : $"{urlWebApi}/api/archivos/{Model.ArchivoId}";
+    var portadaUrl = ImagenUrlHelper.Producto(Url, ViewBag.Url as string, Model.ArchivoId);
 }
 
 <div class="card">
     <div class="row g-0 align-items-center">
         <div class="col-md-2 text-center bg-white p-2">
-            <img src="@portadaUrl" alt="@Model.Titulo" class="img-fluid" style="max-height: 120px;">
+            <img src="@portadaUrl" alt="@Model.Titulo" onerror="@ImagenUrlHelper.FallbackOnError(Url)" class="img-fluid" style="max-height: 120px;">
         </div>
         <div class="col-md-6">
             <div class="card-body">

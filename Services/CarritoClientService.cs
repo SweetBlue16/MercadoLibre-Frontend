@@ -1,4 +1,5 @@
 using frontendnet.Models;
+using frontendnet.Services.Errors;
 
 namespace frontendnet.Services;
 
@@ -6,30 +7,26 @@ public class CarritoClientService(HttpClient client)
 {
     public async Task<CarritoResumen?> GetAsync()
     {
-        return await client.GetFromJsonAsync<CarritoResumen>("api/carrito");
+        return await ApiErrorMapper.GetFromJsonAsync<CarritoResumen>(client, "api/carrito");
     }
 
     public async Task AgregarAsync(int productoId, int cantidad = 1)
     {
-        var response = await client.PostAsJsonAsync("api/carrito", new { productoid = productoId, cantidad });
-        response.EnsureSuccessStatusCode();
+        await ApiErrorMapper.PostAsJsonAsync(client, "api/carrito", new { productoid = productoId, cantidad });
     }
 
     public async Task ActualizarAsync(int productoId, int cantidad)
     {
-        var response = await client.PutAsJsonAsync($"api/carrito/{productoId}", new { cantidad });
-        response.EnsureSuccessStatusCode();
+        await ApiErrorMapper.PutAsJsonAsync(client, $"api/carrito/{productoId}", new { cantidad });
     }
 
     public async Task EliminarAsync(int productoId)
     {
-        var response = await client.DeleteAsync($"api/carrito/{productoId}");
-        response.EnsureSuccessStatusCode();
+        await ApiErrorMapper.DeleteAsync(client, $"api/carrito/{productoId}");
     }
 
     public async Task VaciarAsync()
     {
-        var response = await client.DeleteAsync("api/carrito");
-        response.EnsureSuccessStatusCode();
+        await ApiErrorMapper.DeleteAsync(client, "api/carrito");
     }
 }

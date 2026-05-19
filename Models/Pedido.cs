@@ -21,6 +21,8 @@ public class DetallePedido
 
     [DataType(DataType.Currency)]
     public decimal Subtotal { get; set; }
+
+    public Producto? Producto { get; set; }
 }
 
 public class Pedido
@@ -31,6 +33,14 @@ public class Pedido
     [DataType(DataType.Currency)]
     public decimal Total { get; set; }
 
+    public string Estado { get; set; } = "Recibido";
+
     public PedidoUsuario? Usuario { get; set; }
     public List<DetallePedido> Detalles { get; set; } = [];
+}
+
+public class ActualizarEstadoPedido
+{
+    [Required]
+    public string Estado { get; set; } = "Recibido";
 }

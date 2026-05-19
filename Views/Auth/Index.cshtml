@@ -9,6 +9,10 @@
             <h1 class="h3 text-center">Bienvenido a Mercado Libre</h1>
             <h2 class="h6 text-center text-muted">Facultad de Estadística e Informática</h2>
             <h5 class="card-card-title text-center mt-4">@ViewData["Title"]</h5>
+            @if (TempData["Mensaje"] is string mensaje)
+            {
+                <div class="alert alert-success small">@mensaje</div>
+            }
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
             <div class="form-floating mb-3">
@@ -24,7 +28,10 @@
             </div>
 
             <p class="card-text small">Ingrese sus credenciales para poder disfrutar de todo el contenido de la plataforma.</p>
-            <p class="card-text small text-end"><a asp-controller="Auth" asp-action="Registro" class="link-primary text-decoration-none">Crear cuenta</a></p>
+            <p class="card-text small d-flex justify-content-between">
+                <a asp-controller="Auth" asp-action="OlvidePassword" class="link-primary text-decoration-none">¿Olvidaste tu contraseña?</a>
+                <a asp-controller="Auth" asp-action="Registro" class="link-primary text-decoration-none">Crear cuenta</a>
+            </p>
         </div>
 
         <div class="card-footer text-center">

@@ -1,4 +1,4 @@
-@model AuthUser
+@model PerfilViewModel
 @{
     ViewData["Title"] = "Perfil de usuario";
     ViewData["SubTitle"] = "Perfil";
@@ -12,23 +12,86 @@
 
 <h2 class="text-center mb-3">@ViewData["Title"]</h2>
 
+@if (TempData["Mensaje"] is string mensaje)
+{
+    <div class="alert alert-success">@mensaje</div>
+}
+
 <div class="card mt-3">
     <div class="card-body">
         <div class="mb-3 ps-3">
-            <label asp-for="Email" class="form-label form-text"></label>
-            <div class="form-text text-body">@Model.Email</div>
+            <label asp-for="Usuario.Email" class="form-label form-text"></label>
+            <div class="form-text text-body">@Model.Usuario.Email</div>
         </div>
         <div class="mb-3 ps-3">
-            <label asp-for="Nombre" class="form-label form-text"></label>
-            <div class="form-text text-body">@Model.Nombre</div>
+            <label asp-for="Usuario.Nombre" class="form-label form-text"></label>
+            <div class="form-text text-body">@Model.Usuario.Nombre</div>
+        </div>
+        @if (Model.MostrarRol)
+        {
+            <div class="mb-3 ps-3">
+                <label asp-for="Usuario.Rol" class="form-label form-text"></label>
+                <div class="form-text text-body">@Model.Usuario.Rol</div>
+            </div>
+        }
+        <div class="mb-3 ps-3">
+            <label class="form-label form-text">Correo confirmado</label>
+            <div class="form-text text-body">@(Model.Usuario.EmailConfirmado ? "Si" : "No")</div>
         </div>
         <div class="mb-3 ps-3">
-            <label asp-for="Rol" class="form-label form-text"></label>
-            <div class="form-text text-body">@Model.Rol</div>
-        </div>
-        <div class="mb-3 ps-3">
-            <label class="form-label form-text">Tiempo restante</label>
-            <div class="form-text text-body">@ViewBag.timeRemaining</div>
+            <label class="form-label form-text">Tiempo restante de sesion</label>
+            <div class="form-text text-body">@Model.TiempoRestanteSesion</div>
         </div>
     </div>
 </div>
+
+<div class="card mt-3">
+    <div class="card-body">
+        <h3 class="h5">Cambiar contrasena</h3>
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        @if (!Model.CodigoCambioPasswordSolicitado)
+        {
+            <form asp-action="EnviarCodigoCambioPassword" method="post">
+                <button type="submit" class="btn btn-primary btn-sm">Enviar codigo de verificacion</button>
+            </form>
+        }
+        else
+        {
+            <form asp-action="CambiarPassword" method="post">
+                <div class="form-floating mb-3">
+                    <input asp-for="CambioPassword.Codigo" class="form-control" placeholder="Codigo" autocomplete="one-time-code">
+                    <label asp-for="CambioPassword.Codigo" class="form-label"></label>
+                    <span asp-validation-for="CambioPassword.Codigo" class="text-danger"></span>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <input asp-for="CambioPassword.PasswordActual" class="form-control" placeholder="PasswordActual" autocomplete="current-password">
+                    <label asp-for="CambioPassword.PasswordActual" class="form-label"></label>
+                    <span asp-validation-for="CambioPassword.PasswordActual" class="text-danger"></span>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <input asp-for="CambioPassword.PasswordNueva" class="form-control" placeholder="PasswordNueva" autocomplete="new-password">
+                    <label asp-for="CambioPassword.PasswordNueva" class="form-label"></label>
+                    <span asp-validation-for="CambioPassword.PasswordNueva" class="text-danger"></span>
+                    <div class="form-text">
+                        La contrasena debe tener al menos 12 caracteres, una mayuscula, una minuscula, un numero y un caracter especial.
+                    </div>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <input asp-for="CambioPassword.ConfirmPassword" class="form-control" placeholder="ConfirmPassword" autocomplete="new-password">
+                    <label asp-for="CambioPassword.ConfirmPassword" class="form-label"></label>
+                    <span asp-validation-for="CambioPassword.ConfirmPassword" class="text-danger"></span>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-sm">Cambiar contrasena</button>
+            </form>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

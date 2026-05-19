@@ -1,21 +1,26 @@
 @model Producto
 @{
-    var urlWebApi = (ViewBag.Url as string ?? string.Empty).TrimEnd('/');
-    var portadaUrl = Model.ArchivoId == null
-        ? Url.Content("~/images/temp.png")
-        : $"{urlWebApi}/api/archivos/{Model.ArchivoId}";
+    var portadaUrl = ImagenUrlHelper.Producto(Url, ViewBag.Url as string, Model.ArchivoId);
 }
 
 <div class="card h-100">
     <div class="card-header text-center bg-white pt-3">
         <img src="@portadaUrl"
              alt="@Model.Titulo"
+             onerror="@ImagenUrlHelper.FallbackOnError(Url)"
              class="img-fluid"
              style="max-height: 200px; width: fit-content;">
     </div>
 
     <div class="card-body d-flex flex-column">
-        <p class="card-text">@Model.Titulo</p>
+        <p class="card-text">
+            <a asp-controller="Comprar"
+               asp-action="Detalle"
+               asp-route-id="@Model.ProductoId"
+               class="link-dark link-underline-opacity-0 link-underline-opacity-75-hover fw-semibold">
+                @Model.Titulo
+            </a>
+        </p>
 
         <h5 class="card-title">
             @Html.DisplayFor(model => model.Precio)

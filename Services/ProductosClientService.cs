@@ -1,4 +1,5 @@
 using frontendnet.Models;
+using frontendnet.Services.Errors;
 
 namespace frontendnet.Services;
 
@@ -6,41 +7,36 @@ public class ProductosClientService(HttpClient client)
 {
     public async Task<List<Producto>?> GetAsync(string? search)
     {
-        return await client.GetFromJsonAsync<List<Producto>>($"api/productos?s={search}");
+        return await ApiErrorMapper.GetFromJsonAsync<List<Producto>>(client, $"api/productos?s={search}");
     }
 
     public async Task<Producto?> GetAsync(int id)
     {
-        return await client.GetFromJsonAsync<Producto>($"api/productos/{id}");
+        return await ApiErrorMapper.GetFromJsonAsync<Producto>(client, $"api/productos/{id}");
     }
 
     public async Task PostAsync(Producto producto)
     {
-        var response = await client.PostAsJsonAsync("api/productos", producto);
-        response.EnsureSuccessStatusCode();
+        await ApiErrorMapper.PostAsJsonAsync(client, "api/productos", producto);
     }
 
     public async Task PutAsync(Producto producto)
     {
-        var response = await client.PutAsJsonAsync($"api/productos/{producto.ProductoId}", producto);
-        response.EnsureSuccessStatusCode();
+        await ApiErrorMapper.PutAsJsonAsync(client, $"api/productos/{producto.ProductoId}", producto);
     }
 
     public async Task DeleteAsync(int id)
     {
-        var response = await client.DeleteAsync($"api/productos/{id}");
-        response.EnsureSuccessStatusCode();
+        await ApiErrorMapper.DeleteAsync(client, $"api/productos/{id}");
     }
 
     public async Task PostAsync(int id, int categoriaid)
     {
-        var response = await client.PostAsJsonAsync($"api/productos/{id}/categoria", new { categoriaid });
-        response.EnsureSuccessStatusCode();
+        await ApiErrorMapper.PostAsJsonAsync(client, $"api/productos/{id}/categoria", new { categoriaid });
     }
 
     public async Task DeleteAsync(int id, int categoriaid)
     {
-        var response = await client.DeleteAsync($"api/productos/{id}/categoria/{categoriaid}");
-        response.EnsureSuccessStatusCode();
+        await ApiErrorMapper.DeleteAsync(client, $"api/productos/{id}/categoria/{categoriaid}");
     }
 }

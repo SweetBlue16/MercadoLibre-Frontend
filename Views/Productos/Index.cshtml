@@ -77,9 +77,7 @@
             <tbody>
                 @foreach (var item in Model)
                 {
-                    var portadaUrl = item.ArchivoId == null
-                        ? Url.Content("~/images/temp.png")
-                        : $"{urlWebApi}/api/archivos/{item.ArchivoId}";
+                    var portadaUrl = ImagenUrlHelper.Producto(Url, urlWebApi, item.ArchivoId);
 
                     <tr>
                         <td>
@@ -89,6 +87,7 @@
                         <td class="text-center" width="1">
                             <img src="@portadaUrl"
                                  alt="@item.Titulo"
+                                 onerror="@ImagenUrlHelper.FallbackOnError(Url)"
                                  class="img-fluid img-thumbnail"
                                  style="max-height: 60px;">
                         </td>

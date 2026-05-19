@@ -8,7 +8,10 @@
 
 @if (TempData["Mensaje"] is string mensaje)
 {
-    <div class="alert alert-success">@mensaje</div>
+    <div class="alert alert-success">
+        @mensaje
+        <a class="alert-link ms-2" asp-controller="MisPedidos" asp-action="Index">Mis pedidos</a>
+    </div>
 }
 
 @if (TempData["Error"] is string error)

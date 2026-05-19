@@ -4,9 +4,7 @@
     ViewData["SubTitle"] = "Editar";
 
     var urlWebApi = (ViewBag.Url as string ?? string.Empty).TrimEnd('/');
-    var portadaUrl = Model.ArchivoId == null
-        ? Url.Content("~/images/temp.png")
-        : $"{urlWebApi}/api/archivos/{Model.ArchivoId}";
+    var portadaUrl = ImagenUrlHelper.Producto(Url, urlWebApi, Model.ArchivoId);
 }
 
 @section Scripts {
@@ -35,6 +33,7 @@
             <div class="col-md-4 text-center bg-white pt-3">
                 <img src="@portadaUrl"
                      alt="@Model.Titulo"
+                     onerror="@ImagenUrlHelper.FallbackOnError(Url)"
                      class="portada img-fluid"
                      data-url="@urlWebApi"
                      style="max-height: 300px;">

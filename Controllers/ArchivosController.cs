@@ -21,7 +21,7 @@ public class ArchivosController(ArchivosClientService archivos, IConfiguration c
                 return RedirectToAction("Salir", "Auth");
         }
 
-        ViewBag.Url = configuration["UrlWebAPI"];
+        ViewBag.Url = (configuration["UrlWebAPI"] ?? configuration["URLWebAPI"]);
         return View(lista);
     }
 
@@ -39,7 +39,7 @@ public class ArchivosController(ArchivosClientService archivos, IConfiguration c
                 return RedirectToAction("Salir", "Auth");
         }
 
-        ViewBag.Url = configuration["UrlWebAPI"];
+        ViewBag.Url = (configuration["UrlWebAPI"] ?? configuration["URLWebAPI"]);
         return View(item);
     }
 
@@ -51,7 +51,7 @@ public class ArchivosController(ArchivosClientService archivos, IConfiguration c
     [HttpPost]
     public async Task<IActionResult> CrearAsync(Upload itemToCreate)
     {
-        ViewBag.Url = configuration["UrlWebAPI"];
+        ViewBag.Url = (configuration["UrlWebAPI"] ?? configuration["URLWebAPI"]);
 
         if (ModelState.IsValid)
         {
@@ -85,7 +85,7 @@ public class ArchivosController(ArchivosClientService archivos, IConfiguration c
 
     public async Task<IActionResult> EditarAsync(int id)
     {
-        ViewBag.Url = configuration["UrlWebAPI"];
+        ViewBag.Url = (configuration["UrlWebAPI"] ?? configuration["URLWebAPI"]);
 
         try
         {
@@ -113,7 +113,7 @@ public class ArchivosController(ArchivosClientService archivos, IConfiguration c
         ViewBag.ArchivoId = itemToEdit.ArchivoId;
         ViewBag.Nombre = itemToEdit.Nombre;
 
-        ViewBag.Url = configuration["UrlWebAPI"];
+        ViewBag.Url = (configuration["UrlWebAPI"] ?? configuration["URLWebAPI"]);
 
         if (ModelState.IsValid)
         {
@@ -163,14 +163,14 @@ public class ArchivosController(ArchivosClientService archivos, IConfiguration c
                 return RedirectToAction("Salir", "Auth");
         }
 
-        ViewBag.Url = configuration["UrlWebAPI"];
+        ViewBag.Url = (configuration["UrlWebAPI"] ?? configuration["URLWebAPI"]);
         return View(itemToDelete);
     }
 
     [HttpPost]
     public async Task<IActionResult> Eliminar(int id)
     {
-        ViewBag.Url = configuration["UrlWebAPI"];
+        ViewBag.Url = (configuration["UrlWebAPI"] ?? configuration["URLWebAPI"]);
 
         if (ModelState.IsValid)
         {

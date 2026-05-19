@@ -10,6 +10,9 @@ namespace frontendnet;
 
 public class AuthController(AuthClientService auth) : Controller
 {
+    private const string ConfirmacionEmailTempDataKey = "ConfirmacionEmail";
+
+    [HttpGet]
     [AllowAnonymous]
     public IActionResult Index()
     {
@@ -29,34 +32,154 @@ public class AuthController(AuthClientService auth) : Controller
         if (string.Equals(model.Email, model.Password, StringComparison.OrdinalIgnoreCase))
             ModelState.AddModelError(nameof(model.Password), "La contraseña no puede ser igual al correo.");
 
-        if (ModelState.IsValid)
+        if (!ModelState.IsValid) return View(model);
+
+        try
         {
-            try
-            {
-                var creado = await auth.RegistrarAsync(model);
-                if (creado)
-                    return RedirectToAction(nameof(Index));
-            }
-            catch (HttpRequestException)
-            {
-                ModelState.AddModelError(string.Empty, "No fue posible conectar con el API. Intente nuevamente.");
-            }
+            await auth.RegistrarAsync(model);
+            TempData[ConfirmacionEmailTempDataKey] = model.Email;
+            return RedirectToAction(nameof(ConfirmarCorreo));
+        }
+        catch (HttpRequestException ex)
+        {
+            ModelState.AddModelError(string.Empty, ex.Message);
+            return View(model);
+        }
+    }
+
+    [AllowAnonymous]
+    public IActionResult ConfirmarCorreo(string? email)
+    {
+        var emailProtegido = TempData.Peek(ConfirmacionEmailTempDataKey) as string;
+        return View(new ConfirmarCorreo
+        {
+            Email = !string.IsNullOrWhiteSpace(emailProtegido) ? emailProtegido : email ?? string.Empty,
+            EmailBloqueado = !string.IsNullOrWhiteSpace(emailProtegido)
+        });
+    }
+
+    [HttpPost]
+    [AllowAnonymous]
+    public async Task<IActionResult> ConfirmarCorreo(ConfirmarCorreo model)
+    {
+        var emailProtegido = TempData.Peek(ConfirmacionEmailTempDataKey) as string;
+        if (!string.IsNullOrWhiteSpace(emailProtegido))
+        {
+            model.Email = emailProtegido;
+            model.EmailBloqueado = true;
         }
 
-        ModelState.AddModelError(nameof(model.Email), "No fue posible crear la cuenta. Revise los datos capturados.");
-        return View(model);
+        if (!ModelState.IsValid) return View(model);
+
+        try
+        {
+            await auth.ConfirmarCorreoAsync(model);
+            TempData.Remove(ConfirmacionEmailTempDataKey);
+            TempData["Mensaje"] = "Correo confirmado correctamente. Ya puedes iniciar sesión.";
+            return RedirectToAction(nameof(Index));
+        }
+        catch (HttpRequestException ex)
+        {
+            ModelState.AddModelError(string.Empty, ex.Message);
+            if (model.EmailBloqueado) TempData.Keep(ConfirmacionEmailTempDataKey);
+            return View(model);
+        }
+    }
+
+    [HttpPost]
+    [AllowAnonymous]
+    public async Task<IActionResult> ReenviarConfirmacion(ConfirmarCorreo model)
+    {
+        var emailProtegido = TempData.Peek(ConfirmacionEmailTempDataKey) as string;
+        if (!string.IsNullOrWhiteSpace(emailProtegido))
+        {
+            model.Email = emailProtegido;
+            model.EmailBloqueado = true;
+        }
+
+        if (string.IsNullOrWhiteSpace(model.Email))
+        {
+            ModelState.AddModelError(nameof(model.Email), "El correo es obligatorio.");
+            return View(nameof(ConfirmarCorreo), model);
+        }
+
+        try
+        {
+            await auth.ReenviarConfirmacionAsync(model.Email);
+            ViewData["Mensaje"] = "Si la cuenta requiere confirmación, recibirás un nuevo código.";
+            if (model.EmailBloqueado) TempData.Keep(ConfirmacionEmailTempDataKey);
+        }
+        catch (HttpRequestException ex)
+        {
+            ModelState.AddModelError(string.Empty, ex.Message);
+            if (model.EmailBloqueado) TempData.Keep(ConfirmacionEmailTempDataKey);
+        }
+
+        return View(nameof(ConfirmarCorreo), model);
+    }
+
+    [AllowAnonymous]
+    public IActionResult OlvidePassword()
+    {
+        return View(new OlvidePassword());
+    }
+
+    [HttpPost]
+    [AllowAnonymous]
+    public async Task<IActionResult> OlvidePassword(OlvidePassword model)
+    {
+        if (!ModelState.IsValid) return View(model);
+
+        try
+        {
+            await auth.SolicitarResetPasswordAsync(model);
+            TempData["Mensaje"] = "Si el correo está registrado, recibirás instrucciones para restablecer tu contraseña.";
+            return RedirectToAction(nameof(RestablecerPassword), new { email = model.Email });
+        }
+        catch (HttpRequestException ex)
+        {
+            ModelState.AddModelError(string.Empty, ex.Message);
+            return View(model);
+        }
+    }
+
+    [AllowAnonymous]
+    public IActionResult RestablecerPassword(string? email)
+    {
+        return View(new RestablecerPassword { Email = email ?? string.Empty });
+    }
+
+    [HttpPost]
+    [AllowAnonymous]
+    public async Task<IActionResult> RestablecerPassword(RestablecerPassword model)
+    {
+        if (string.Equals(model.Email, model.Password, StringComparison.OrdinalIgnoreCase))
+            ModelState.AddModelError(nameof(model.Password), "La contraseña no puede ser igual al correo.");
+
+        if (!ModelState.IsValid) return View(model);
+
+        try
+        {
+            await auth.RestablecerPasswordAsync(model);
+            TempData["Mensaje"] = "Contraseña restablecida correctamente. Ya puedes iniciar sesión.";
+            return RedirectToAction(nameof(Index));
+        }
+        catch (HttpRequestException ex)
+        {
+            ModelState.AddModelError(string.Empty, ex.Message);
+            return View(model);
+        }
     }
 
     [HttpPost]
     [AllowAnonymous]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> IndexAsync(Login model)
+    public async Task<IActionResult> Index(Login model)
     {
         if (ModelState.IsValid)
         {
             try
             {
-                // Esta función verifica en backend que el correo y contraseña sean válidos
                 var token = await auth.ObtenTokenAsync(model.Email, model.Password);
 
                 if (token == null)
@@ -67,37 +190,38 @@ public class AuthController(AuthClientService auth) : Controller
 
                 var claims = new List<Claim>
                 {
-                    // Todo esto se guarda en la Cookie
                     new(ClaimTypes.Name, token.Email),
                     new(ClaimTypes.GivenName, token.Nombre),
                     new("jwt", token.Jwt),
                     new(ClaimTypes.Role, token.Rol),
+                    new("emailConfirmado", token.EmailConfirmado.ToString()),
                 };
 
                 await auth.IniciaSesionAsync(claims);
 
-                // Usuario válido
                 if (token.Rol == "Administrador")
                     return RedirectToAction("Index", "Productos");
 
                 return RedirectToAction("Index", "Home");
             }
-            catch (Exception)
+            catch (HttpRequestException ex)
             {
-                ModelState.AddModelError("Email", "Credenciales no válidas. Inténtelo nuevamente.");
+                ModelState.AddModelError("Email", ex.Message);
             }
         }
 
         return View(model);
     }
 
+    [AcceptVerbs("GET", "POST")]
     [Authorize(Roles = "Administrador, Usuario")]
     public async Task<IActionResult> SalirAsync()
     {
-        // Cierra la sesión
-        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-
-        // Sino, se redirige a la página inicial
+        await auth.CerrarSesionAsync();
+        Response.Headers.CacheControl = "no-store, no-cache, must-revalidate";
+        Response.Headers.Pragma = "no-cache";
+        Response.Headers.Expires = "0";
+        TempData["Mensaje"] = "Tu sesion se cerro correctamente.";
         return RedirectToAction("Index", "Auth");
     }
 }

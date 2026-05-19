@@ -1,0 +1,62 @@
+@model Producto?
+@{
+    ViewData["Title"] = "Detalle del producto";
+    var portadaUrl = Model is null ? Url.Content("~/images/temp.png") : ImagenUrlHelper.Producto(Url, ViewBag.Url as string, Model.ArchivoId);
+}
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb small">
+        <li class="breadcrumb-item"><a asp-action="Index">Comprar</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Detalle</li>
+    </ol>
+</nav>
+
+@if (Model is null)
+{
+    <div class="alert alert-warning" role="alert">
+        @(ViewData["ErrorMessage"] ?? "El producto solicitado no esta disponible.")
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary btn-sm">Volver al catalogo</a>
+}
+else
+{
+    <div class="row g-4 align-items-start">
+        <div class="col-12 col-md-5 text-center">
+            <img src="@portadaUrl"
+                 alt="@Model.Titulo"
+                 onerror="@ImagenUrlHelper.FallbackOnError(Url)"
+                 class="img-fluid border rounded bg-white p-3"
+                 style="max-height: 420px; object-fit: contain;">
+        </div>
+        <div class="col-12 col-md-7">
+            <h2 class="h3">@Model.Titulo</h2>
+
+            <p class="fs-4 fw-semibold mb-3">
+                @Html.DisplayFor(model => Model.Precio)
+            </p>
+
+            @if (Model.Categorias?.Any() == true)
+            {
+                <div class="mb-3">
+                    @foreach (var cat in Model.Categorias)
+                    {
+                        <span class="badge rounded-pill text-bg-warning me-1">@cat.Nombre</span>
+                    }
+                </div>
+            }
+
+            <p class="text-success fw-semibold small">
+                <i class="bi bi-lightning-fill"></i> Envio gratis
+            </p>
+
+            <p class="mb-4">@Model.Descripcion</p>
+
+            <div class="d-flex flex-wrap gap-2">
+                <form asp-controller="Carrito" asp-action="Agregar" asp-route-id="@Model.ProductoId" method="post">
+                    <button type="submit" class="btn btn-primary btn-sm">Agregar al carrito</button>
+                </form>
+                <a asp-action="Index" class="btn btn-outline-secondary btn-sm">Volver al catalogo</a>
+            </div>
+        </div>
+    </div>
+}

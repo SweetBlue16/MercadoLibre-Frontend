@@ -6,7 +6,9 @@
     @if (User.Identity?.IsAuthenticated == true)
     {
         <a class="nav-link" asp-controller="Perfil">Hola @User.Identity.Name!</a>
-        <a class="nav-link" asp-controller="Auth" asp-action="Salir">Salir</a>
+        <form asp-controller="Auth" asp-action="Salir" method="post" class="d-inline">
+            <button type="submit" class="nav-link btn btn-link p-0">Salir</button>
+        </form>
     }
     else
     {

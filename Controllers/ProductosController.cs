@@ -32,7 +32,7 @@ public class ProductosController(
         if (User.FindFirstValue(ClaimTypes.Role) == "Administrador")
             ViewBag.SoloAdmin = true;
 
-        ViewBag.Url = configuration["UrlWebAPI"];
+        ViewBag.Url = (configuration["UrlWebAPI"] ?? configuration["URLWebAPI"]);
         ViewBag.search = s;
 
         return View(lista);
@@ -41,7 +41,7 @@ public class ProductosController(
     public async Task<IActionResult> Detalle(int id)
     {
         Producto? item = null;
-        ViewBag.Url = configuration["UrlWebAPI"];
+        ViewBag.Url = (configuration["UrlWebAPI"] ?? configuration["URLWebAPI"]);
 
         try
         {
@@ -59,7 +59,7 @@ public class ProductosController(
 
     public async Task<IActionResult> Crear()
     {
-        ViewBag.Url = configuration["UrlWebAPI"];
+        ViewBag.Url = (configuration["UrlWebAPI"] ?? configuration["URLWebAPI"]);
         await ProductosDropDownListAsync();
 
         return View();
@@ -68,7 +68,7 @@ public class ProductosController(
     [HttpPost]
     public async Task<IActionResult> CrearAsync(Producto itemToCreate)
     {
-        ViewBag.Url = configuration["UrlWebAPI"];
+        ViewBag.Url = (configuration["UrlWebAPI"] ?? configuration["URLWebAPI"]);
 
         if (ModelState.IsValid)
         {
@@ -93,7 +93,7 @@ public class ProductosController(
     public async Task<IActionResult> EditarAsync(int id)
     {
         Producto? itemToEdit = null;
-        ViewBag.Url = configuration["UrlWebAPI"];
+        ViewBag.Url = (configuration["UrlWebAPI"] ?? configuration["URLWebAPI"]);
 
         try
         {
@@ -117,7 +117,7 @@ public class ProductosController(
     {
         if (id != itemToEdit.ProductoId) return NotFound();
 
-        ViewBag.Url = configuration["UrlWebAPI"];
+        ViewBag.Url = (configuration["UrlWebAPI"] ?? configuration["URLWebAPI"]);
 
         if (ModelState.IsValid)
         {
@@ -157,7 +157,7 @@ public class ProductosController(
                 return RedirectToAction("Salir", "Auth");
         }
 
-        ViewBag.Url = configuration["UrlWebAPI"];
+        ViewBag.Url = (configuration["UrlWebAPI"] ?? configuration["URLWebAPI"]);
 
         return View(itemToDelete);
     }
@@ -165,7 +165,7 @@ public class ProductosController(
     [HttpPost]
     public async Task<IActionResult> Eliminar(int id)
     {
-        ViewBag.Url = configuration["UrlWebAPI"];
+        ViewBag.Url = (configuration["UrlWebAPI"] ?? configuration["URLWebAPI"]);
 
         if (ModelState.IsValid)
         {
@@ -211,7 +211,7 @@ public class ProductosController(
         if (itemToView == null) return View("Error");
 
         ViewData["ProductoId"] = itemToView.ProductoId;
-        ViewBag.Url = configuration["UrlWebAPI"];
+        ViewBag.Url = (configuration["UrlWebAPI"] ?? configuration["URLWebAPI"]);
 
         return View(itemToView);
     }
@@ -234,7 +234,7 @@ public class ProductosController(
                 return RedirectToAction("Salir", "Auth");
         }
 
-        ViewBag.Url = configuration["UrlWebAPI"];
+        ViewBag.Url = (configuration["UrlWebAPI"] ?? configuration["URLWebAPI"]);
 
         return View(itemToView);
     }
@@ -264,7 +264,7 @@ public class ProductosController(
             }
         }
 
-        ViewBag.Url = configuration["UrlWebAPI"];
+        ViewBag.Url = (configuration["UrlWebAPI"] ?? configuration["URLWebAPI"]);
         ModelState.AddModelError("id", "No ha sido posible realizar la acción. Inténtelo nuevamente.");
         await CategoriasDropDownListAsync();
 
@@ -299,7 +299,7 @@ public class ProductosController(
                 return RedirectToAction("Salir", "Auth");
         }
 
-        ViewBag.Url = configuration["UrlWebAPI"];
+        ViewBag.Url = (configuration["UrlWebAPI"] ?? configuration["URLWebAPI"]);
 
         return View(itemToView);
     }
