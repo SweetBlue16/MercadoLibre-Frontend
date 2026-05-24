@@ -65,7 +65,7 @@
             {
                 <tr>
                     <td width="1">
-                        <img src="@ImagenUrlHelper.Producto(Url, ViewBag.Url as string, item.Producto?.ArchivoId)" alt="@item.Titulo" onerror="@ImagenUrlHelper.FallbackOnError(Url)" class="img-fluid img-thumbnail" style="max-height: 48px;">
+                        <img src="@ImagenUrlHelper.Producto(Url, ViewBag.Url as string, item.Producto?.ArchivoId, item.Producto?.ImagenUrl)" alt="@item.Titulo" onerror="@ImagenUrlHelper.FallbackOnError(Url)" class="img-fluid img-thumbnail" style="max-height: 48px;">
                     </td>
                     <td>@item.Titulo</td>
                     <td>@item.Cantidad</td>

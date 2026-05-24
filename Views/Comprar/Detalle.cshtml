@@ -1,7 +1,9 @@
 @model Producto?
 @{
     ViewData["Title"] = "Detalle del producto";
-    var portadaUrl = Model is null ? Url.Content("~/images/temp.png") : ImagenUrlHelper.Producto(Url, ViewBag.Url as string, Model.ArchivoId);
+    var portadaUrl = Model is null
+        ? Url.Content("~/images/temp.png")
+        : ImagenUrlHelper.Producto(Url, ViewBag.Url as string, Model.ArchivoId, Model.ImagenUrl);
 }
 
 <nav aria-label="breadcrumb">

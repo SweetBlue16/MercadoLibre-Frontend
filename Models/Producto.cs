@@ -25,6 +25,8 @@ public class Producto
     [Display(Name = "Portada")]
     public int? ArchivoId { get; set; }
 
+    public string? ImagenUrl { get; set; }
+
     [Display(Name = "Eliminable")]
     public bool Protegida { get; set; } = false;
 

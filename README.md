@@ -36,10 +36,13 @@ dotnet run --urls http://localhost:8080
 ## Imagenes
 
 - La construccion de URLs esta centralizada en `Helpers/ImagenUrlHelper.cs`.
-- Si `ArchivoId` existe, se renderiza `http://localhost:3000/api/archivos/{ArchivoId}`.
+- El listado de productos consume `GET /api/productos`; el backend devuelve `ImagenUrl` como ruta relativa, por ejemplo `/api/archivos/5`.
+- Razor combina `ImagenUrl` con `UrlWebAPI` desde configuracion y renderiza directamente `<img src="...">`.
+- Si `ImagenUrl` no viene pero `ArchivoId` existe, el helper conserva compatibilidad construyendo `/api/archivos/{ArchivoId}` con `UrlWebAPI`.
 - Si no hay `ArchivoId`, se usa placeholder local `/images/temp.png`.
 - `wwwroot/images/imagenes-productos` no es fuente principal para productos con `ArchivoId`; solo queda como recurso estatico auxiliar/fallback.
 - No se renderizan rutas fisicas, `uploads`, `wwwroot`, `C:\...` ni placeholders externos.
+- Es normal que el navegador solicite cada imagen como recurso. Lo que se evita es hacer llamadas programaticas adicionales por producto para obtener metadata de archivos.
 
 ## Seguridad MVC
 

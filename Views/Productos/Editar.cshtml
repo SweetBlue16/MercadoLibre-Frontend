@@ -4,7 +4,7 @@
     ViewData["SubTitle"] = "Editar";
 
     var urlWebApi = (ViewBag.Url as string ?? string.Empty).TrimEnd('/');
-    var portadaUrl = ImagenUrlHelper.Producto(Url, urlWebApi, Model.ArchivoId);
+    var portadaUrl = ImagenUrlHelper.Producto(Url, urlWebApi, Model.ArchivoId, Model.ImagenUrl);
 }
 
 @section Scripts {

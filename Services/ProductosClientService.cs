@@ -7,7 +7,8 @@ public class ProductosClientService(HttpClient client)
 {
     public async Task<List<Producto>?> GetAsync(string? search)
     {
-        return await ApiErrorMapper.GetFromJsonAsync<List<Producto>>(client, $"api/productos?s={search}");
+        var query = string.IsNullOrWhiteSpace(search) ? string.Empty : $"?s={Uri.EscapeDataString(search)}";
+        return await ApiErrorMapper.GetFromJsonAsync<List<Producto>>(client, $"api/productos{query}");
     }
 
     public async Task<Producto?> GetAsync(int id)

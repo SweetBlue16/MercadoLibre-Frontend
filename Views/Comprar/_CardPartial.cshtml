@@ -1,6 +1,6 @@
 @model Producto
 @{
-    var portadaUrl = ImagenUrlHelper.Producto(Url, ViewBag.Url as string, Model.ArchivoId);
+    var portadaUrl = ImagenUrlHelper.Producto(Url, ViewBag.Url as string, Model.ArchivoId, Model.ImagenUrl);
 }
 
 <div class="card h-100">
@@ -9,6 +9,7 @@
              alt="@Model.Titulo"
              onerror="@ImagenUrlHelper.FallbackOnError(Url)"
              class="img-fluid"
+             loading="lazy"
              style="max-height: 200px; width: fit-content;">
     </div>
 
