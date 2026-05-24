@@ -12,7 +12,7 @@ public class UsuariosClientService(HttpClient client)
 
     public async Task<Usuario?> GetAsync(string email)
     {
-        return await ApiErrorMapper.GetFromJsonAsync<Usuario>(client, $"api/usuarios/{email}");
+        return await ApiErrorMapper.GetFromJsonAsync<Usuario>(client, $"api/usuarios/{Uri.EscapeDataString(email)}");
     }
 
     public async Task PostAsync(UsuarioPwd usuario)
@@ -22,11 +22,11 @@ public class UsuariosClientService(HttpClient client)
 
     public async Task PutAsync(Usuario usuario)
     {
-        await ApiErrorMapper.PutAsJsonAsync(client, $"api/usuarios/{usuario.Email}", usuario);
+        await ApiErrorMapper.PutAsJsonAsync(client, $"api/usuarios/{Uri.EscapeDataString(usuario.Email)}", usuario);
     }
 
     public async Task DeleteAsync(string email)
     {
-        await ApiErrorMapper.DeleteAsync(client, $"api/usuarios/{email}");
+        await ApiErrorMapper.DeleteAsync(client, $"api/usuarios/{Uri.EscapeDataString(email)}");
     }
 }

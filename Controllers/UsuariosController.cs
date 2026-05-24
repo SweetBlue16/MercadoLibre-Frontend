@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using frontendnet.Models;
 using frontendnet.Services;
+using frontendnet.Services.Errors;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -149,6 +150,27 @@ public class UsuariosController(UsuariosClientService usuarios, RolesClientServi
             try
             {
                 await usuarios.DeleteAsync(id);
+                TempData["Mensaje"] = "Usuario eliminado correctamente.";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (ApiClientException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Conflict
+                && ex.Code == ErrorCodeCatalog.UserHasAssociatedOrders)
+            {
+                TempData["Error"] = ex.Message;
+                return RedirectToAction(nameof(Index));
+            }
+            catch (ApiClientException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                return RedirectToAction("Salir", "Auth");
+            }
+            catch (ApiClientException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Forbidden)
+            {
+                TempData["Error"] = ex.Message;
+                return RedirectToAction(nameof(Index));
+            }
+            catch (ApiClientException)
+            {
+                TempData["Error"] = "No ha sido posible realizar la acción. Inténtelo nuevamente.";
                 return RedirectToAction(nameof(Index));
             }
             catch (HttpRequestException ex)

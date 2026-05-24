@@ -12,6 +12,7 @@ public static class ErrorCodeCatalog
     public const string PasswordConfirmationMismatch = "PASSWORD_CONFIRMATION_MISMATCH";
     public const string PasswordReuse = "PASSWORD_REUSE";
     public const string EmailAlreadyRegistered = "EMAIL_ALREADY_REGISTERED";
+    public const string UserHasAssociatedOrders = "USER_HAS_ASSOCIATED_ORDERS";
     public const string EmailConfirmationInvalid = "EMAIL_CONFIRMATION_INVALID";
     public const string EmailSendFailed = "EMAIL_SEND_FAILED";
     public const string PasswordChangeCodeInvalid = "PASSWORD_CHANGE_CODE_INVALID";

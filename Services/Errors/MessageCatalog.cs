@@ -20,6 +20,7 @@ public static class MessageCatalog
         [ErrorCodeCatalog.PasswordConfirmationMismatch] = "La nueva contrasena y la confirmacion no coinciden.",
         [ErrorCodeCatalog.PasswordReuse] = "La nueva contrasena debe ser diferente a la actual.",
         [ErrorCodeCatalog.EmailAlreadyRegistered] = "El correo electronico ya esta registrado.",
+        [ErrorCodeCatalog.UserHasAssociatedOrders] = "No se puede eliminar el usuario porque tiene pedidos asociados.",
         [ErrorCodeCatalog.EmailConfirmationInvalid] = "El codigo de confirmacion es invalido o expiro.",
         [ErrorCodeCatalog.EmailSendFailed] = "No fue posible enviar el correo. Intentalo nuevamente mas tarde.",
         [ErrorCodeCatalog.PasswordChangeCodeInvalid] = "El codigo no es valido o ha expirado.",

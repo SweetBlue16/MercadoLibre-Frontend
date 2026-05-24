@@ -12,6 +12,16 @@
 
 <h2 class="text-center mb-3">@ViewData["Title"] <small class="text-muted fs-5">@ViewData["SubTitle"]</small></h2>
 
+@if (TempData["Mensaje"] is string mensaje)
+{
+    <div class="alert alert-success small" role="alert">@mensaje</div>
+}
+
+@if (TempData["Error"] is string error)
+{
+    <div class="alert alert-warning small" role="alert">@error</div>
+}
+
 <div class="row small mb-3">
     <div class="col">
         <a class="text-decoration-none" asp-action="Crear" title="Crear nuevo">Crear nuevo</a>
