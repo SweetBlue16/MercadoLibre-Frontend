@@ -163,8 +163,9 @@ public class ProductosController(
         return View(itemToEdit);
     }
 
-    public async Task<IActionResult> Eliminar(int id, bool? showError = false)
-    {
+    [HttpGet]
+        public async Task<IActionResult> Eliminar(int id, bool showError)
+            {
         if (!ModelState.IsValid)
         {
             return BadRequest();
@@ -177,7 +178,7 @@ public class ProductosController(
             itemToDelete = await productos.GetAsync(id);
             if (itemToDelete == null) return NotFound();
 
-            if (showError.GetValueOrDefault())
+            if (showError)
                 ViewData["ErrorMessage"] = GenericActionErrorMessage;
         }
         catch (HttpRequestException ex)
@@ -315,7 +316,8 @@ public class ProductosController(
         return View(new ProductoCategoria { Producto = producto });
     }
 
-    public async Task<IActionResult> CategoriasRemover(int id, int categoriaid, bool? showError = false)
+    [HttpGet]
+public async Task<IActionResult> CategoriasRemover(int id, int categoriaid, bool showError)
     {
         if (!ModelState.IsValid)
         {
@@ -339,7 +341,7 @@ public class ProductosController(
                 Nombre = categoria.Nombre
             };
 
-            if (showError.GetValueOrDefault())
+           if (showError)
                 ViewData["ErrorMessage"] = GenericActionErrorMessage;
         }
         catch (HttpRequestException ex)

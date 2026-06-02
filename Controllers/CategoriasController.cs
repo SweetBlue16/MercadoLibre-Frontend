@@ -131,31 +131,32 @@ public class CategoriasController(CategoriasClientService categorias) : Controll
         return View(itemToEdit);
     }
 
-    public async Task<IActionResult> Eliminar(int id, bool? showError = false)
+    [HttpGet]
+public async Task<IActionResult> Eliminar(int id, bool showError)
+{
+    if (!ModelState.IsValid)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest();
-        }
-
-        Categoria? itemToDelete = null;
-
-        try
-        {
-            itemToDelete = await categorias.GetAsync(id);
-            if (itemToDelete == null) return NotFound();
-
-            if (showError.GetValueOrDefault())
-                ViewData["ErrorMessage"] = GenericActionErrorMessage;
-        }
-        catch (HttpRequestException ex)
-        {
-            if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                return RedirectToAction(SalirAction, AuthController);
-        }
-
-        return View(itemToDelete);
+        return BadRequest();
     }
+
+    Categoria? itemToDelete = null;
+
+    try
+    {
+        itemToDelete = await categorias.GetAsync(id);
+        if (itemToDelete == null) return NotFound();
+
+        if (showError)
+            ViewData["ErrorMessage"] = GenericActionErrorMessage;
+    }
+    catch (HttpRequestException ex)
+    {
+        if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            return RedirectToAction(SalirAction, AuthController);
+    }
+
+    return View(itemToDelete);
+}
 
     [HttpPost]
     public async Task<IActionResult> Eliminar(int id)

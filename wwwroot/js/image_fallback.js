@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            image.removeAttribute('data-fallback-src');
+            delete image.dataset.fallbackSrc;
             image.src = fallbackSrc;
         });
     });

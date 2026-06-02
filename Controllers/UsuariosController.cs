@@ -147,32 +147,33 @@ public class UsuariosController(UsuariosClientService usuarios, RolesClientServi
         return View(itemToEdit);
     }
 
-    public async Task<IActionResult> Eliminar(string id, bool? showError = false)
+    [HttpGet]
+public async Task<IActionResult> Eliminar(string id, bool showError)
+{
+    if (!ModelState.IsValid)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest();
-        }
-
-        Usuario? itemToDelete = null;
-
-        try
-        {
-            itemToDelete = await usuarios.GetAsync(id);
-            if (itemToDelete == null) return NotFound();
-
-            if (showError.GetValueOrDefault())
-                ViewData["ErrorMessage"] = GenericActionErrorMessage;
-        }
-        catch (HttpRequestException ex)
-        {
-            if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                return RedirectToAction(SalirAction, AuthController);
-        }
-
-        ViewBag.PuedeEditar = !(User.Identity?.Name == id);
-        return View(itemToDelete);
+        return BadRequest();
     }
+
+    Usuario? itemToDelete = null;
+
+    try
+    {
+        itemToDelete = await usuarios.GetAsync(id);
+        if (itemToDelete == null) return NotFound();
+
+        if (showError)
+            ViewData["ErrorMessage"] = GenericActionErrorMessage;
+    }
+    catch (HttpRequestException ex)
+    {
+        if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            return RedirectToAction(SalirAction, AuthController);
+    }
+
+    ViewBag.PuedeEditar = !(User.Identity?.Name == id);
+    return View(itemToDelete);
+}
 
     [HttpPost]
     public async Task<IActionResult> Eliminar(string id)

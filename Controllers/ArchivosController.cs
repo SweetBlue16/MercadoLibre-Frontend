@@ -150,52 +150,52 @@ public class ArchivosController(ArchivosClientService archivos, IConfiguration c
     }
 
     [HttpGet]
-    public async Task<IActionResult> Eliminar(int id, bool? showError = false)
+public async Task<IActionResult> Eliminar(int id, bool showError)
+{
+    if (!ModelState.IsValid) return BadRequest();
+
+    try
     {
-        if (!ModelState.IsValid) return BadRequest();
+        var itemToDelete = await archivos.GetAsync(id);
+        if (itemToDelete == null) return NotFound();
 
-        try
-        {
-            var itemToDelete = await archivos.GetAsync(id);
-            if (itemToDelete == null) return NotFound();
+        if (showError)
+            ViewData["ErrorMessage"] = GenericActionErrorMessage;
 
-            if (showError.GetValueOrDefault())
-                ViewData["ErrorMessage"] = GenericActionErrorMessage;
-
-            ViewBag.Url = configuration[UrlWebApiKey] ?? configuration[UrlWebApiFallbackKey];
-            return View(itemToDelete);
-        }
-        catch (HttpRequestException ex)
-        {
-            return ex.StatusCode == System.Net.HttpStatusCode.Unauthorized
-                ? RedirectToAction(SalirAction, AuthController)
-                : NotFound();
-        }
+        ViewBag.Url = configuration[UrlWebApiKey] ?? configuration[UrlWebApiFallbackKey];
+        return View(itemToDelete);
     }
+    catch (HttpRequestException ex)
+    {
+        return ex.StatusCode == System.Net.HttpStatusCode.Unauthorized
+            ? RedirectToAction(SalirAction, AuthController)
+            : NotFound();
+    }
+}
 
     [HttpPost]
-    public async Task<IActionResult> Eliminar(int id)
+public async Task<IActionResult> Eliminar(int id)
+{
+    ViewBag.Url = configuration[UrlWebApiKey] ?? configuration[UrlWebApiFallbackKey];
+
+    if (!ModelState.IsValid)
     {
-        ViewBag.Url = configuration[UrlWebApiKey] ?? configuration[UrlWebApiFallbackKey];
-
-        if (!ModelState.IsValid)
-        {
-            return RedirectToAction(nameof(Eliminar), new { id, showError = true });
-        }
-
-        try
-        {
-            await archivos.DeleteAsync(id);
-            return RedirectToAction(nameof(Index));
-        }
-        catch (HttpRequestException ex)
-        {
-            if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                return RedirectToAction(SalirAction, AuthController);
-        }
-
         return RedirectToAction(nameof(Eliminar), new { id, showError = true });
     }
+
+    try
+    {
+        await archivos.DeleteAsync(id);
+        return RedirectToAction(nameof(Index));
+    }
+    catch (HttpRequestException ex)
+    {
+        if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            return RedirectToAction(SalirAction, AuthController);
+    }
+
+    return RedirectToAction(nameof(Eliminar), new { id, showError = true });
+}
 
     private static bool IsAllowedImage(string contentType)
     {
