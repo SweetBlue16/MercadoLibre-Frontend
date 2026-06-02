@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using frontendnet.Models;
 using frontendnet.Services;
 using frontendnet.Services.Errors;
@@ -11,6 +10,15 @@ namespace frontendnet;
 [Authorize(Roles = "Administrador")]
 public class UsuariosController(UsuariosClientService usuarios, RolesClientService roles) : Controller
 {
+    private const string AuthController = "Auth";
+    private const string SalirAction = "Salir";
+    private const string EmailField = "Email";
+    private const string NombreField = "Nombre";
+    private const string ErrorTempDataKey = "Error";
+    private const string MessageTempDataKey = "Mensaje";
+    private const string GenericActionErrorMessage = "No ha sido posible realizar la acción. Inténtelo nuevamente.";
+    private const string UserDeletedMessage = "Usuario eliminado correctamente.";
+
     public async Task<IActionResult> Index()
     {
         List<Usuario>? lista = [];
@@ -22,7 +30,7 @@ public class UsuariosController(UsuariosClientService usuarios, RolesClientServi
         catch (HttpRequestException ex)
         {
             if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                return RedirectToAction("Salir", "Auth");
+                return RedirectToAction(SalirAction, AuthController);
         }
 
         return View(lista);
@@ -30,6 +38,11 @@ public class UsuariosController(UsuariosClientService usuarios, RolesClientServi
 
     public async Task<IActionResult> Detalle(string id)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest();
+        }
+
         Usuario? item = null;
 
         try
@@ -40,7 +53,7 @@ public class UsuariosController(UsuariosClientService usuarios, RolesClientServi
         catch (HttpRequestException ex)
         {
             if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                return RedirectToAction("Salir", "Auth");
+                return RedirectToAction(SalirAction, AuthController);
         }
 
         return View(item);
@@ -55,21 +68,25 @@ public class UsuariosController(UsuariosClientService usuarios, RolesClientServi
     [HttpPost]
     public async Task<IActionResult> CrearAsync(UsuarioPwd itemToCreate)
     {
-        if (ModelState.IsValid)
+        if (!ModelState.IsValid)
         {
-            try
-            {
-                await usuarios.PostAsync(itemToCreate);
-                return RedirectToAction(nameof(Index));
-            }
-            catch (HttpRequestException ex)
-            {
-                if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                    return RedirectToAction("Salir", "Auth");
-            }
+            ModelState.AddModelError(EmailField, GenericActionErrorMessage);
+            await RolesDropDownListAsync();
+            return View(itemToCreate);
         }
 
-        ModelState.AddModelError("Email", "No ha sido posible realizar la acción. Inténtelo nuevamente.");
+        try
+        {
+            await usuarios.PostAsync(itemToCreate);
+            return RedirectToAction(nameof(Index));
+        }
+        catch (HttpRequestException ex)
+        {
+            if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                return RedirectToAction(SalirAction, AuthController);
+        }
+
+        ModelState.AddModelError(EmailField, GenericActionErrorMessage);
         await RolesDropDownListAsync();
         return View(itemToCreate);
     }
@@ -77,6 +94,11 @@ public class UsuariosController(UsuariosClientService usuarios, RolesClientServi
     [HttpGet("[controller]/[action]/{email}")]
     public async Task<IActionResult> EditarAsync(string email)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest();
+        }
+
         Usuario? itemToEdit = null;
 
         try
@@ -87,7 +109,7 @@ public class UsuariosController(UsuariosClientService usuarios, RolesClientServi
         catch (HttpRequestException ex)
         {
             if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                return RedirectToAction("Salir", "Auth");
+                return RedirectToAction(SalirAction, AuthController);
         }
 
         ViewBag.PuedeEditar = !(User.Identity?.Name == email);
@@ -100,21 +122,26 @@ public class UsuariosController(UsuariosClientService usuarios, RolesClientServi
     {
         if (email != itemToEdit.Email) return NotFound();
 
-        if (ModelState.IsValid)
+        if (!ModelState.IsValid)
         {
-            try
-            {
-                await usuarios.PutAsync(itemToEdit);
-                return RedirectToAction(nameof(Index));
-            }
-            catch (HttpRequestException ex)
-            {
-                if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                    return RedirectToAction("Salir", "Auth");
-            }
+            ModelState.AddModelError(NombreField, GenericActionErrorMessage);
+            ViewBag.PuedeEditar = !(User.Identity?.Name == email);
+            await RolesDropDownListAsync(itemToEdit?.Rol);
+            return View(itemToEdit);
         }
 
-        ModelState.AddModelError("Nombre", "No ha sido posible realizar la acción. Inténtelo nuevamente.");
+        try
+        {
+            await usuarios.PutAsync(itemToEdit);
+            return RedirectToAction(nameof(Index));
+        }
+        catch (HttpRequestException ex)
+        {
+            if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                return RedirectToAction(SalirAction, AuthController);
+        }
+
+        ModelState.AddModelError(NombreField, GenericActionErrorMessage);
         ViewBag.PuedeEditar = !(User.Identity?.Name == email);
         await RolesDropDownListAsync(itemToEdit?.Rol);
         return View(itemToEdit);
@@ -122,6 +149,11 @@ public class UsuariosController(UsuariosClientService usuarios, RolesClientServi
 
     public async Task<IActionResult> Eliminar(string id, bool? showError = false)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest();
+        }
+
         Usuario? itemToDelete = null;
 
         try
@@ -130,12 +162,12 @@ public class UsuariosController(UsuariosClientService usuarios, RolesClientServi
             if (itemToDelete == null) return NotFound();
 
             if (showError.GetValueOrDefault())
-                ViewData["ErrorMessage"] = "No ha sido posible realizar la acción. Inténtelo nuevamente.";
+                ViewData["ErrorMessage"] = GenericActionErrorMessage;
         }
         catch (HttpRequestException ex)
         {
             if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                return RedirectToAction("Salir", "Auth");
+                return RedirectToAction(SalirAction, AuthController);
         }
 
         ViewBag.PuedeEditar = !(User.Identity?.Name == id);
@@ -145,39 +177,41 @@ public class UsuariosController(UsuariosClientService usuarios, RolesClientServi
     [HttpPost]
     public async Task<IActionResult> Eliminar(string id)
     {
-        if (ModelState.IsValid)
+        if (!ModelState.IsValid)
         {
-            try
-            {
-                await usuarios.DeleteAsync(id);
-                TempData["Mensaje"] = "Usuario eliminado correctamente.";
-                return RedirectToAction(nameof(Index));
-            }
-            catch (ApiClientException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Conflict
-                && ex.Code == ErrorCodeCatalog.UserHasAssociatedOrders)
-            {
-                TempData["Error"] = ex.Message;
-                return RedirectToAction(nameof(Index));
-            }
-            catch (ApiClientException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-            {
-                return RedirectToAction("Salir", "Auth");
-            }
-            catch (ApiClientException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Forbidden)
-            {
-                TempData["Error"] = ex.Message;
-                return RedirectToAction(nameof(Index));
-            }
-            catch (ApiClientException)
-            {
-                TempData["Error"] = "No ha sido posible realizar la acción. Inténtelo nuevamente.";
-                return RedirectToAction(nameof(Index));
-            }
-            catch (HttpRequestException ex)
-            {
-                if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                    return RedirectToAction("Salir", "Auth");
-            }
+            return RedirectToAction(nameof(Eliminar), new { id, showError = true });
+        }
+
+        try
+        {
+            await usuarios.DeleteAsync(id);
+            TempData[MessageTempDataKey] = UserDeletedMessage;
+            return RedirectToAction(nameof(Index));
+        }
+        catch (ApiClientException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Conflict
+            && ex.Code == ErrorCodeCatalog.UserHasAssociatedOrders)
+        {
+            TempData[ErrorTempDataKey] = ex.Message;
+            return RedirectToAction(nameof(Index));
+        }
+        catch (ApiClientException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            return RedirectToAction(SalirAction, AuthController);
+        }
+        catch (ApiClientException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Forbidden)
+        {
+            TempData[ErrorTempDataKey] = ex.Message;
+            return RedirectToAction(nameof(Index));
+        }
+        catch (ApiClientException)
+        {
+            TempData[ErrorTempDataKey] = GenericActionErrorMessage;
+            return RedirectToAction(nameof(Index));
+        }
+        catch (HttpRequestException ex)
+        {
+            if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                return RedirectToAction(SalirAction, AuthController);
         }
 
         return RedirectToAction(nameof(Eliminar), new { id, showError = true });

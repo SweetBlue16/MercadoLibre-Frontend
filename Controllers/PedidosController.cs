@@ -8,6 +8,17 @@ namespace frontendnet;
 [Authorize(Roles = "Administrador")]
 public class PedidosController(PedidosClientService pedidos, IConfiguration configuration) : Controller
 {
+    private const string AuthController = "Auth";
+    private const string SalirAction = "Salir";
+    private const string UrlWebApiKey = "UrlWebAPI";
+    private const string UrlWebApiFallbackKey = "URLWebAPI";
+    private const string ErrorTempDataKey = "Error";
+    private const string MessageTempDataKey = "Mensaje";
+    private const string InvalidOrderStatusMessage = "Estado de pedido invalido.";
+    private const string OrderStatusUpdatedMessage = "Estado actualizado correctamente.";
+    private const string OrderStatusUpdateErrorMessage = "No fue posible actualizar el estado.";
+    private const string OrdersQueryErrorMessage = "No fue posible consultar pedidos. Verifique que el API este disponible.";
+
     private static readonly string[] EstadosPermitidos =
     [
         "Recibido",
@@ -28,9 +39,9 @@ public class PedidosController(PedidosClientService pedidos, IConfiguration conf
         catch (HttpRequestException ex)
         {
             if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                return RedirectToAction("Salir", "Auth");
+                return RedirectToAction(SalirAction, AuthController);
 
-            ViewData["ErrorMessage"] = "No fue posible consultar pedidos. Verifique que el API este disponible.";
+            ViewData["ErrorMessage"] = OrdersQueryErrorMessage;
         }
 
         return View(lista ?? []);
@@ -38,7 +49,12 @@ public class PedidosController(PedidosClientService pedidos, IConfiguration conf
 
     public async Task<IActionResult> Detalle(int id)
     {
-        ViewBag.Url = configuration["UrlWebAPI"] ?? configuration["URLWebAPI"];
+        if (!ModelState.IsValid)
+        {
+            return BadRequest();
+        }
+
+        ViewBag.Url = configuration[UrlWebApiKey] ?? configuration[UrlWebApiFallbackKey];
         Pedido? item = null;
 
         try
@@ -49,7 +65,7 @@ public class PedidosController(PedidosClientService pedidos, IConfiguration conf
         catch (HttpRequestException ex)
         {
             if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                return RedirectToAction("Salir", "Auth");
+                return RedirectToAction(SalirAction, AuthController);
         }
 
         return View(item);
@@ -58,23 +74,29 @@ public class PedidosController(PedidosClientService pedidos, IConfiguration conf
     [HttpPost]
     public async Task<IActionResult> ActualizarEstado(int id, ActualizarEstadoPedido model)
     {
+        if (!ModelState.IsValid)
+        {
+            TempData[ErrorTempDataKey] = InvalidOrderStatusMessage;
+            return RedirectToAction(nameof(Detalle), new { id });
+        }
+
         if (!EstadosPermitidos.Contains(model.Estado))
         {
-            TempData["Error"] = "Estado de pedido invalido.";
+            TempData[ErrorTempDataKey] = InvalidOrderStatusMessage;
             return RedirectToAction(nameof(Detalle), new { id });
         }
 
         try
         {
             await pedidos.ActualizarEstadoAsync(id, model.Estado);
-            TempData["Mensaje"] = "Estado actualizado correctamente.";
+            TempData[MessageTempDataKey] = OrderStatusUpdatedMessage;
         }
         catch (HttpRequestException ex)
         {
             if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                return RedirectToAction("Salir", "Auth");
+                return RedirectToAction(SalirAction, AuthController);
 
-            TempData["Error"] = "No fue posible actualizar el estado.";
+            TempData[ErrorTempDataKey] = OrderStatusUpdateErrorMessage;
         }
 
         return RedirectToAction(nameof(Detalle), new { id });

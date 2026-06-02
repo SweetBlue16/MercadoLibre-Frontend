@@ -1,24 +1,24 @@
-document.addEventListener('DOMContentLoaded', (event) => {
+document.addEventListener('DOMContentLoaded', () => {
     const htmlElement = document.documentElement;
     const switchElement = document.getElementById('darkModeSwitch');
-    const modoLuz = document.querySelector('.modo-luz')
+    const modoLuz = document.querySelector('.modo-luz');
 
-    // Establece como el modo light como el predeterminado
+    if (!switchElement || !modoLuz) {
+        return;
+    }
+
     const currentTheme = localStorage.getItem('bsTheme') || 'light';
-    htmlElement.setAttribute('data-bs-theme', currentTheme);
+
+    htmlElement.dataset.bsTheme = currentTheme;
     switchElement.checked = currentTheme === 'dark';
 
     switchElement.addEventListener('change', function () {
-        if (this.checked) {
-            htmlElement.setAttribute('data-bs-theme', 'dark');
-            localStorage.setItem('bsTheme', 'dark');
-            modoLuz.classList.remove('bi-brightness-high');
-            modoLuz.classList.add('bi-moon-stars');
-        } else {
-            htmlElement.setAttribute('data-bs-theme', 'light');
-            localStorage.setItem('bsTheme', 'light');
-            modoLuz.classList.remove('bi-moon-stars');
-            modoLuz.classList.add('bi-brightness-high');
-        }
+        const selectedTheme = this.checked ? 'dark' : 'light';
+
+        htmlElement.dataset.bsTheme = selectedTheme;
+        localStorage.setItem('bsTheme', selectedTheme);
+
+        modoLuz.classList.toggle('bi-brightness-high', selectedTheme === 'light');
+        modoLuz.classList.toggle('bi-moon-stars', selectedTheme === 'dark');
     });
 });

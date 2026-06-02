@@ -11,6 +11,11 @@ public class HomeController : Controller
 
     public IActionResult Error([FromServices] IHostEnvironment hostEnvironment)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest();
+        }
+
         return View();
     }
 

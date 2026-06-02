@@ -9,6 +9,12 @@ namespace frontendnet;
 [Authorize(Roles = "Usuario")]
 public class ComprarController(ProductosClientService productos, IConfiguration configuration) : Controller
 {
+    private const string AuthController = "Auth";
+    private const string SalirAction = "Salir";
+    private const string UrlWebApiKey = "UrlWebAPI";
+    private const string UrlWebApiFallbackKey = "URLWebAPI";
+    private const string ServerUnavailableMessage = "El servidor no esta disponible en este momento. Intentalo mas tarde.";
+
     public async Task<IActionResult> Index(string? s)
     {
         List<Producto>? lista = [];
@@ -20,25 +26,30 @@ public class ComprarController(ProductosClientService productos, IConfiguration 
         catch (HttpRequestException ex)
         {
             if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                return RedirectToAction("Salir", "Auth");
+                return RedirectToAction(SalirAction, AuthController);
         }
 
-        ViewBag.Url = (configuration["UrlWebAPI"] ?? configuration["URLWebAPI"]);
+        ViewBag.Url = configuration[UrlWebApiKey] ?? configuration[UrlWebApiFallbackKey];
         ViewBag.search = s;
         return View(lista);
     }
 
     public async Task<IActionResult> Detalle(int id)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest();
+        }
+
         try
         {
             var producto = await productos.GetAsync(id);
-            ViewBag.Url = configuration["UrlWebAPI"] ?? configuration["URLWebAPI"];
+            ViewBag.Url = configuration[UrlWebApiKey] ?? configuration[UrlWebApiFallbackKey];
             return View(producto);
         }
         catch (ApiClientException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
         {
-            return RedirectToAction("Salir", "Auth");
+            return RedirectToAction(SalirAction, AuthController);
         }
         catch (ApiClientException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
         {
@@ -48,7 +59,7 @@ public class ComprarController(ProductosClientService productos, IConfiguration 
         }
         catch (HttpRequestException)
         {
-            ViewData["ErrorMessage"] = "El servidor no esta disponible en este momento. Intentalo mas tarde.";
+            ViewData["ErrorMessage"] = ServerUnavailableMessage;
             return View((Producto?)null);
         }
     }

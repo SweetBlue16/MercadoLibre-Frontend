@@ -88,35 +88,45 @@ public class AuthController(AuthClientService auth) : Controller
 
     [HttpPost]
     [AllowAnonymous]
-    public async Task<IActionResult> ReenviarConfirmacion(ConfirmarCorreo model)
+
+public async Task<IActionResult> ReenviarConfirmacion(ConfirmarCorreo model)
+{
+    var emailProtegido = TempData.Peek(ConfirmacionEmailTempDataKey) as string;
+
+    if (!string.IsNullOrWhiteSpace(emailProtegido))
     {
-        var emailProtegido = TempData.Peek(ConfirmacionEmailTempDataKey) as string;
-        if (!string.IsNullOrWhiteSpace(emailProtegido))
-        {
-            model.Email = emailProtegido;
-            model.EmailBloqueado = true;
-        }
+        model.Email = emailProtegido;
+        model.EmailBloqueado = true;
+    }
 
-        if (string.IsNullOrWhiteSpace(model.Email))
-        {
-            ModelState.AddModelError(nameof(model.Email), "El correo es obligatorio.");
-            return View(nameof(ConfirmarCorreo), model);
-        }
-
-        try
-        {
-            await auth.ReenviarConfirmacionAsync(model.Email);
-            ViewData["Mensaje"] = "Si la cuenta requiere confirmación, recibirás un nuevo código.";
-            if (model.EmailBloqueado) TempData.Keep(ConfirmacionEmailTempDataKey);
-        }
-        catch (HttpRequestException ex)
-        {
-            ModelState.AddModelError(string.Empty, ex.Message);
-            if (model.EmailBloqueado) TempData.Keep(ConfirmacionEmailTempDataKey);
-        }
-
+    if (!ModelState.IsValid)
+    {
+        if (model.EmailBloqueado) TempData.Keep(ConfirmacionEmailTempDataKey);
         return View(nameof(ConfirmarCorreo), model);
     }
+
+    if (string.IsNullOrWhiteSpace(model.Email))
+    {
+        ModelState.AddModelError(nameof(model.Email), "El correo es obligatorio.");
+        return View(nameof(ConfirmarCorreo), model);
+    }
+
+    try
+    {
+        await auth.ReenviarConfirmacionAsync(model.Email);
+        ViewData["Mensaje"] = "Si la cuenta requiere confirmación, recibirás un nuevo código.";
+
+        if (model.EmailBloqueado) TempData.Keep(ConfirmacionEmailTempDataKey);
+    }
+    catch (HttpRequestException ex)
+    {
+        ModelState.AddModelError(string.Empty, ex.Message);
+
+        if (model.EmailBloqueado) TempData.Keep(ConfirmacionEmailTempDataKey);
+    }
+
+    return View(nameof(ConfirmarCorreo), model);
+}
 
     [AllowAnonymous]
     public IActionResult OlvidePassword()
