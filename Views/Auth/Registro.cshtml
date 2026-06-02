@@ -3,40 +3,40 @@
     ViewData["Title"] = "Crear cuenta";
 }
 
-<form asp-action="Registro">
+<form asp-action="Registro" method="post">
     <div class="card mx-auto" style="max-width: 560px;">
         <div class="card-body">
             <h1 class="h4 text-center">Crear cuenta</h1>
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
             <div class="form-floating mb-3">
-                <input asp-for="Nombre" class="form-control" placeholder="Nombre">
+                <input asp-for="Nombre" class="form-control" placeholder="Nombre" maxlength="40">
                 <label asp-for="Nombre" class="form-label"></label>
                 <span asp-validation-for="Nombre" class="text-danger"></span>
             </div>
 
             <div class="form-floating mb-3">
-                <input asp-for="Email" class="form-control" placeholder="Email">
+                <input asp-for="Email" class="form-control" placeholder="Email" maxlength="40">
                 <label asp-for="Email" class="form-label"></label>
                 <span asp-validation-for="Email" class="text-danger"></span>
             </div>
 
             <div class="form-floating mb-3">
-                <input asp-for="Password" class="form-control" placeholder="Password">
+                <input asp-for="Password" class="form-control" placeholder="Password" maxlength="12">
                 <label asp-for="Password" class="form-label"></label>
                 <span asp-validation-for="Password" class="text-danger"></span>
                 <div class="form-text">
-                    La contraseña debe tener al menos 12 caracteres, una mayúscula, una minúscula, un número y un carácter especial.
+                    La contraseña debe tener 12 caracteres, una mayúscula, una minúscula, un número y un carácter especial.
                 </div>
             </div>
 
             <div class="form-floating mb-3">
-                <input asp-for="ConfirmPassword" class="form-control" placeholder="ConfirmPassword">
+                <input asp-for="ConfirmPassword" class="form-control" placeholder="ConfirmPassword" maxlength="12">
                 <label asp-for="ConfirmPassword" class="form-label"></label>
                 <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
             </div>
 
-            <p class="card-text small">La cuenta creada desde este formulario siempre tendra rol Usuario.</p>
+            <p class="card-text small">La cuenta creada desde este formulario siempre tendrá rol Usuario.</p>
         </div>
 
         <div class="card-footer text-center">

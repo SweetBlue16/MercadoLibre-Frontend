@@ -3,7 +3,7 @@
     ViewData["Title"] = "Inicio de sesión";
 }
 
-<form asp-action="Index">
+<form asp-action="Index" method="post">
     <div class="card mx-auto" style="max-width: 500px;">
         <div class="card-body">
             <h1 class="h3 text-center">Bienvenido a Mercado Libre</h1>
@@ -16,13 +16,13 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
             <div class="form-floating mb-3">
-                <input asp-for="Email" class="form-control" placeholder="Email">
+                <input asp-for="Email" class="form-control" placeholder="Email" maxlength="40">
                 <label asp-for="Email" class="form-label"></label>
                 <span asp-validation-for="Email" class="text-danger"></span>
             </div>
 
             <div class="form-floating mb-3">
-                <input asp-for="Password" class="form-control" placeholder="Password">
+                <input asp-for="Password" class="form-control" placeholder="Password" maxlength="12">
                 <label asp-for="Password" class="form-label"></label>
                 <span asp-validation-for="Password" class="text-danger"></span>
             </div>

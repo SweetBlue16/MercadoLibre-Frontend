@@ -29,7 +29,7 @@ public class ProductosController(
 
         try
         {
-            lista = await productos.GetAsync(s);
+            lista = await productos.GetAsync(NormalizeSearch(s));
         }
         catch (HttpRequestException ex)
         {
@@ -41,7 +41,7 @@ public class ProductosController(
             ViewBag.SoloAdmin = true;
 
         ViewBag.Url = configuration[UrlWebApiKey] ?? configuration[UrlWebApiFallbackKey];
-        ViewBag.search = s;
+        ViewBag.search = NormalizeSearch(s);
 
         return View(lista);
     }
@@ -384,5 +384,11 @@ public class ProductosController(
     {
         var listado = await archivos.GetAsync();
         ViewBag.Archivo = new SelectList(listado, "ArchivoId", "Nombre", itemSeleccionado);
+    }
+
+    private static string? NormalizeSearch(string? search)
+    {
+        var value = search?.Trim();
+        return string.IsNullOrWhiteSpace(value) ? null : value[..Math.Min(value.Length, 40)];
     }
 }

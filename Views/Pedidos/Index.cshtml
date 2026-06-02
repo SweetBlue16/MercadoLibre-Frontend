@@ -37,7 +37,7 @@
                     <tr>
                         <td>@item.PedidoId</td>
                         <td>@(item.Usuario?.Email ?? "N/A")</td>
-                        <td>@item.Fecha</td>
+                        <td>@Html.DisplayFor(modelItem => item.Fecha)</td>
                         <td>@Html.DisplayFor(modelItem => item.Total)</td>
                         <td>@item.Estado</td>
                         <td>

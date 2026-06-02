@@ -28,7 +28,7 @@ public class PerfilController(PerfilClientService perfil) : Controller
         try
         {
             await perfil.EnviarCodigoCambioPasswordAsync();
-            TempData["Mensaje"] = "Codigo de verificacion enviado.";
+            TempData["Mensaje"] = "Código de verificación enviado.";
             TempData[MostrarCambioPasswordKey] = "true";
             return RedirectToAction("Index");
         }
@@ -52,7 +52,7 @@ public class PerfilController(PerfilClientService perfil) : Controller
         try
         {
             await perfil.CambiarPasswordAsync(cambioPassword);
-            TempData["Mensaje"] = "Contrasena actualizada correctamente.";
+            TempData["Mensaje"] = "Contraseña actualizada correctamente.";
             TempData.Remove(MostrarCambioPasswordKey);
             return RedirectToAction("Index");
         }
@@ -73,21 +73,6 @@ public class PerfilController(PerfilClientService perfil) : Controller
         if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(nombre) || string.IsNullOrWhiteSpace(rol) || string.IsNullOrWhiteSpace(jwt))
             return null;
 
-        var tiempoRestante = "No disponible";
-        try
-        {
-            var segundosTexto = await perfil.ObtenTiempoAsync();
-            if (int.TryParse(segundosTexto, out var segundos))
-            {
-                var tiempo = TimeSpan.FromSeconds(segundos);
-                tiempoRestante = $"{(int)tiempo.TotalMinutes} min {tiempo.Seconds} s";
-            }
-        }
-        catch (HttpRequestException)
-        {
-            tiempoRestante = "No disponible";
-        }
-
         return new PerfilViewModel
         {
             Usuario = new AuthUser
@@ -98,7 +83,6 @@ public class PerfilController(PerfilClientService perfil) : Controller
                 Jwt = jwt,
                 EmailConfirmado = bool.TryParse(User.FindFirstValue("emailConfirmado"), out var confirmado) && confirmado,
             },
-            TiempoRestanteSesion = tiempoRestante,
             CodigoCambioPasswordSolicitado = string.Equals(TempData.Peek(MostrarCambioPasswordKey) as string, "true", StringComparison.OrdinalIgnoreCase),
         };
     }

@@ -13,7 +13,7 @@ public class ComprarController(ProductosClientService productos, IConfiguration 
     private const string SalirAction = "Salir";
     private const string UrlWebApiKey = "UrlWebAPI";
     private const string UrlWebApiFallbackKey = "URLWebAPI";
-    private const string ServerUnavailableMessage = "El servidor no esta disponible en este momento. Intentalo mas tarde.";
+    private const string ServerUnavailableMessage = "El servidor no está disponible en este momento. Inténtalo más tarde.";
 
     public async Task<IActionResult> Index(string? s)
     {
@@ -21,7 +21,7 @@ public class ComprarController(ProductosClientService productos, IConfiguration 
 
         try
         {
-            lista = await productos.GetAsync(s);
+            lista = await productos.GetAsync(NormalizeSearch(s));
         }
         catch (HttpRequestException ex)
         {
@@ -30,7 +30,7 @@ public class ComprarController(ProductosClientService productos, IConfiguration 
         }
 
         ViewBag.Url = configuration[UrlWebApiKey] ?? configuration[UrlWebApiFallbackKey];
-        ViewBag.search = s;
+        ViewBag.search = NormalizeSearch(s);
         return View(lista);
     }
 
@@ -62,5 +62,11 @@ public class ComprarController(ProductosClientService productos, IConfiguration 
             ViewData["ErrorMessage"] = ServerUnavailableMessage;
             return View((Producto?)null);
         }
+    }
+
+    private static string? NormalizeSearch(string? search)
+    {
+        var value = search?.Trim();
+        return string.IsNullOrWhiteSpace(value) ? null : value[..Math.Min(value.Length, 40)];
     }
 }

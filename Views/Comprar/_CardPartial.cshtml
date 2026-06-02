@@ -7,7 +7,7 @@
     <div class="card-header text-center bg-white pt-3">
         <img src="@portadaUrl"
              alt="@Model.Titulo"
-             onerror="@ImagenUrlHelper.FallbackOnError(Url)"
+             data-fallback-src="@ImagenUrlHelper.Placeholder(Url)"
              class="img-fluid"
              loading="lazy"
              style="max-height: 200px; width: fit-content;">

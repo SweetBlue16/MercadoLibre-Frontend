@@ -1,8 +1,8 @@
 # Mercado Libre Seguro - Frontend
 
-Frontend ASP.NET Core MVC para consumir el backend en `UrlWebAPI`. Usa cookies HttpOnly, autorizacion por roles, antiforgery global y servicios `HttpClient`.
+Frontend ASP.NET Core MVC para consumir el backend configurado en `UrlWebAPI`. Usa cookies HttpOnly, autorización por roles, antiforgery global, cabeceras de seguridad centralizadas y servicios `HttpClient`.
 
-## Configuracion
+## Configuración
 
 `appsettings.json` debe definir:
 
@@ -19,41 +19,64 @@ La clave antigua `URLWebAPI` se conserva como fallback temporal, pero el uso pri
 ```powershell
 dotnet restore
 dotnet build
-dotnet run --urls http://localhost:8080
+dotnet run --urls http://localhost:5000
 ```
 
 ## Flujos
 
 - Login con cookie HttpOnly; el JWT queda en claims de la cookie y no se renderiza en HTML.
-- Registro publico muestra la politica de password y siempre solicita rol `Usuario` al backend.
-- Confirmacion de correo en `/Auth/ConfirmarCorreo`.
-- Recuperacion en `/Auth/OlvidePassword` y `/Auth/RestablecerPassword`.
-- Perfil en `/Perfil` muestra email, nombre, rol, correo confirmado y tiempo restante como minutos/segundos; incluye cambio de contraseña.
+- Registro público muestra la política de password y siempre solicita rol `Usuario` al backend.
+- Confirmación de correo en `/Auth/ConfirmarCorreo`.
+- Recuperación en `/Auth/OlvidePassword` y `/Auth/RestablecerPassword`.
+- Perfil en `/Perfil` muestra email, nombre, rol, correo confirmado y cambio de contraseña.
 - Usuario: Comprar, Carrito, Mis pedidos y Perfil.
-- Administrador: Productos, Categorias, Archivos, Usuarios, Pedidos y Bitacora.
-- Admin puede actualizar estado de pedido; usuario ve el estado actualizado en Mis pedidos.
+- Administrador: Productos, Categorías, Archivos, Usuarios, Pedidos y Bitácora.
 
-## Imagenes
+## Imágenes
 
-- La construccion de URLs esta centralizada en `Helpers/ImagenUrlHelper.cs`.
+- La construcción de URLs está centralizada en `Helpers/ImagenUrlHelper.cs`.
 - El listado de productos consume `GET /api/productos`; el backend devuelve `ImagenUrl` como ruta relativa, por ejemplo `/api/archivos/5`.
-- Razor combina `ImagenUrl` con `UrlWebAPI` desde configuracion y renderiza directamente `<img src="...">`.
+- Razor combina `ImagenUrl` con `UrlWebAPI` desde configuración y renderiza directamente `<img src="...">`.
 - Si `ImagenUrl` no viene pero `ArchivoId` existe, el helper conserva compatibilidad construyendo `/api/archivos/{ArchivoId}` con `UrlWebAPI`.
 - Si no hay `ArchivoId`, se usa placeholder local `/images/temp.png`.
-- `wwwroot/images/imagenes-productos` no es fuente principal para productos con `ArchivoId`; solo queda como recurso estatico auxiliar/fallback.
-- No se renderizan rutas fisicas, `uploads`, `wwwroot`, `C:\...` ni placeholders externos.
-- Es normal que el navegador solicite cada imagen como recurso. Lo que se evita es hacer llamadas programaticas adicionales por producto para obtener metadata de archivos.
+- `wwwroot/images/imagenes-productos` no es fuente principal para productos con `ArchivoId`; queda como recurso estático auxiliar/fallback.
+- No se renderizan rutas físicas, `uploads`, `wwwroot`, `C:\...` ni placeholders externos.
 
 ## Seguridad MVC
 
-- Cookies HttpOnly, SameSite Lax y Secure en produccion.
+- `SecurityHeadersMiddleware` agrega CSP, anti-clickjacking, `nosniff`, `Referrer-Policy`, `Permissions-Policy` y `Cross-Origin-Opener-Policy`.
+- `Program.cs` desactiva `Server: Kestrel` con `options.AddServerHeader = false`.
+- En producción se usa `UseHsts()` y `UseHttpsRedirection()`.
+- `NoStoreCacheMiddleware` aplica `Cache-Control: no-store, no-cache, must-revalidate` a páginas autenticadas o sensibles sin afectar assets estáticos.
+- Cookies HttpOnly, SameSite Lax y Secure en producción.
 - `AutoValidateAntiforgeryTokenAttribute` global para formularios POST.
-- Validacion de modelos en cliente y servidor.
-- Manejo centralizado de errores en `Services/Errors`: el frontend lee `code` del API, lo traduce con `MessageCatalog` y evita mostrar errores tecnicos como `Bad Request`, stack traces o `Response status code does not indicate success`.
-- Si el API esta apagada, timeout o conexion rechazada, se muestra: `El servidor no está disponible en este momento. Inténtalo más tarde.`
-- Manejo de 401 redirigiendo a salida/login.
+- Manejo centralizado de errores en `Services/Errors`.
 - No se guarda JWT en localStorage ni se expone en vistas.
 
-## Confirmacion de correo
+La CSP permite recursos locales, imágenes `data:`/`blob:` y el origen de API configurado. En desarrollo también permite orígenes locales necesarios. `style-src 'unsafe-inline'` se mantiene temporalmente porque varias vistas Razor y componentes Bootstrap usan estilos inline; `script-src` no permite scripts inline.
 
-Despues del registro, `/Auth/ConfirmarCorreo` conserva el email en `TempData` protegida, muestra el campo como solo lectura y solo permite capturar el codigo. Si se entra manualmente sin contexto protegido, el formulario permite escribir email y codigo.
+## Confirmación de correo
+
+Después del registro, `/Auth/ConfirmarCorreo` conserva el email en `TempData` protegida, muestra el campo como solo lectura y solo permite capturar el código. Si se entra manualmente sin contexto protegido, se muestra una vista controlada con mensaje claro.
+
+## Alcance OWASP ZAP
+
+Para futuros escaneos, crear un Context de ZAP que incluya únicamente la aplicación:
+
+- Frontend MVC local o Azure.
+- Backend API local o Azure.
+
+Ejemplos locales:
+
+- `^https?://localhost:5000/.*`
+- `^https?://localhost:3000/.*`
+
+Excluir tráfico externo del navegador que no pertenece al alcance:
+
+- `.*googleapis\.com.*`
+- `.*google\.com.*`
+- `.*gvt2\.com.*`
+- `.*clients\.google\.com.*`
+- `.*accounts\.google\.com.*`
+
+La alerta de ZAP "Petición de Autenticación Identificada" en el backend es informativa. Debe revisarse que login no devuelva passwords, que los errores estén controlados y que el rate limiting siga activo, pero no requiere un cambio de código por sí sola.

@@ -12,7 +12,7 @@ public class Archivo
 
     public string? Nombre { get; set; }
 
-    [Display(Name = "Tamprecio")]
+    [Display(Name = "Tamaño")]
     public int? Size { get; set; }
 
     [Display(Name = "Repositorio")]

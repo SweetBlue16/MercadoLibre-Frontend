@@ -15,7 +15,7 @@ public static class ImagenUrlHelper
         if (archivoId is null or <= 0)
             return url.Content(PlaceholderProducto);
 
-        var backend = (urlWebApi ?? string.Empty).TrimEnd('/');
+        var backend = NormalizeApiBase(urlWebApi);
         return string.IsNullOrWhiteSpace(backend)
             ? url.Content(PlaceholderProducto)
             : $"{backend}/api/archivos/{archivoId}";
@@ -29,11 +29,6 @@ public static class ImagenUrlHelper
     public static string Placeholder(IUrlHelper url)
     {
         return url.Content(PlaceholderProducto);
-    }
-
-    public static string FallbackOnError(IUrlHelper url)
-    {
-        return $"this.onerror=null;this.src='{Placeholder(url)}';";
     }
 
     private static string? ResolveApiImageUrl(string? urlWebApi, string? imagenUrl)
@@ -50,7 +45,15 @@ public static class ImagenUrlHelper
         if (!safeImagenUrl.StartsWith("/api/", StringComparison.OrdinalIgnoreCase))
             return null;
 
-        var backend = (urlWebApi ?? string.Empty).TrimEnd('/');
+        var backend = NormalizeApiBase(urlWebApi);
         return string.IsNullOrWhiteSpace(backend) ? null : $"{backend}{safeImagenUrl}";
+    }
+
+    private static string NormalizeApiBase(string? urlWebApi)
+    {
+        var backend = (urlWebApi ?? string.Empty).TrimEnd('/');
+        return backend.EndsWith("/api", StringComparison.OrdinalIgnoreCase)
+            ? backend[..^4]
+            : backend;
     }
 }

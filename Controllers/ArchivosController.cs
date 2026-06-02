@@ -1,5 +1,6 @@
 using frontendnet.Models;
 using frontendnet.Services;
+using frontendnet.Services.Errors;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,6 +15,7 @@ public class ArchivosController(ArchivosClientService archivos, IConfiguration c
     private const string UrlWebApiFallbackKey = "URLWebAPI";
     private const string PortadaField = "Portada";
     private const string GenericActionErrorMessage = "No ha sido posible realizar la acción. Inténtelo nuevamente.";
+    private const long MaxImageSizeBytes = 5 * 1024 * 1024;
 
     public async Task<IActionResult> Index()
     {
@@ -35,28 +37,25 @@ public class ArchivosController(ArchivosClientService archivos, IConfiguration c
 
     public async Task<IActionResult> Detalle(int id)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest();
-        }
-
-        Archivo? item = null;
+        if (!ModelState.IsValid) return BadRequest();
 
         try
         {
-            item = await archivos.GetAsync(id);
+            var item = await archivos.GetAsync(id);
             if (item == null) return NotFound();
+
+            ViewBag.Url = configuration[UrlWebApiKey] ?? configuration[UrlWebApiFallbackKey];
+            return View(item);
         }
         catch (HttpRequestException ex)
         {
-            if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                return RedirectToAction(SalirAction, AuthController);
+            return ex.StatusCode == System.Net.HttpStatusCode.Unauthorized
+                ? RedirectToAction(SalirAction, AuthController)
+                : NotFound();
         }
-
-        ViewBag.Url = configuration[UrlWebApiKey] ?? configuration[UrlWebApiFallbackKey];
-        return View(item);
     }
 
+    [HttpGet]
     public IActionResult Crear()
     {
         return View();
@@ -67,133 +66,111 @@ public class ArchivosController(ArchivosClientService archivos, IConfiguration c
     {
         ViewBag.Url = configuration[UrlWebApiKey] ?? configuration[UrlWebApiFallbackKey];
 
-        if (!ModelState.IsValid)
+        if (!ModelState.IsValid || !ValidateImage(itemToCreate.Portada))
         {
-            ModelState.AddModelError(PortadaField, GenericActionErrorMessage);
             return View(itemToCreate);
         }
 
         try
         {
-            if (itemToCreate.Portada.Length > 5 * 1024 * 1024)
-            {
-                ModelState.AddModelError(PortadaField, $"El archivo de {itemToCreate.Portada.Length / 1024} KB supera el tamprecio máximo permitido.");
-                return View(itemToCreate);
-            }
-
-            if (!IsAllowedImage(itemToCreate.Portada.ContentType))
-            {
-                ModelState.AddModelError(PortadaField, $"El archivo {itemToCreate.Portada.FileName} no tiene una extensión permitida.");
-                return View(itemToCreate);
-            }
-
             await archivos.PostAsync(itemToCreate);
             return RedirectToAction(nameof(Index));
         }
-        catch (HttpRequestException ex)
+        catch (ApiClientException ex)
         {
             if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                 return RedirectToAction(SalirAction, AuthController);
-        }
 
-        ModelState.AddModelError(PortadaField, GenericActionErrorMessage);
-        return View(itemToCreate);
+            ModelState.AddModelError(PortadaField, ex.Message);
+            return View(itemToCreate);
+        }
+        catch (HttpRequestException)
+        {
+            ModelState.AddModelError(PortadaField, GenericActionErrorMessage);
+            return View(itemToCreate);
+        }
     }
 
+    [HttpGet]
     public async Task<IActionResult> EditarAsync(int id)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest();
-        }
+        if (!ModelState.IsValid) return BadRequest();
 
         ViewBag.Url = configuration[UrlWebApiKey] ?? configuration[UrlWebApiFallbackKey];
 
         try
         {
-            Archivo? itemToEdit = await archivos.GetAsync(id);
-            ViewBag.ArchivoId = itemToEdit?.ArchivoId;
-            ViewBag.Nombre = itemToEdit?.Nombre;
-
+            var itemToEdit = await archivos.GetAsync(id);
             if (itemToEdit == null) return NotFound();
+
+            ViewBag.ArchivoId = itemToEdit.ArchivoId;
+            ViewBag.Nombre = itemToEdit.Nombre;
+            return View();
         }
         catch (HttpRequestException ex)
         {
-            if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                return RedirectToAction(SalirAction, AuthController);
+            return ex.StatusCode == System.Net.HttpStatusCode.Unauthorized
+                ? RedirectToAction(SalirAction, AuthController)
+                : NotFound();
         }
-
-        return View();
     }
 
     [HttpPost]
     public async Task<IActionResult> EditarAsync(int id, Upload itemToEdit)
     {
-        if (itemToEdit == null) return NotFound();
-        if (id != itemToEdit.ArchivoId) return NotFound();
+        if (itemToEdit == null || id != itemToEdit.ArchivoId) return NotFound();
 
         ViewBag.ArchivoId = itemToEdit.ArchivoId;
         ViewBag.Nombre = itemToEdit.Nombre;
         ViewBag.Url = configuration[UrlWebApiKey] ?? configuration[UrlWebApiFallbackKey];
 
-        if (!ModelState.IsValid)
+        if (!ModelState.IsValid || !ValidateImage(itemToEdit.Portada))
         {
-            ModelState.AddModelError(PortadaField, GenericActionErrorMessage);
             return View(itemToEdit);
         }
 
         try
         {
-            if (itemToEdit.Portada.Length > 5 * 1024 * 1024)
-            {
-                ModelState.AddModelError(PortadaField, $"El archivo de {itemToEdit.Portada.Length / 1024} KB supera el tamprecio máximo permitido.");
-                return View(itemToEdit);
-            }
-
-            if (!IsAllowedImage(itemToEdit.Portada.ContentType))
-            {
-                ModelState.AddModelError(PortadaField, $"El archivo {itemToEdit.Portada.FileName} no tiene una extensión permitida.");
-                return View(itemToEdit);
-            }
-
             await archivos.PutAsync(itemToEdit);
             return RedirectToAction(nameof(Index));
         }
-        catch (HttpRequestException ex)
+        catch (ApiClientException ex)
         {
             if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                 return RedirectToAction(SalirAction, AuthController);
-        }
 
-        ModelState.AddModelError(PortadaField, GenericActionErrorMessage);
-        return View(itemToEdit);
+            ModelState.AddModelError(PortadaField, ex.Message);
+            return View(itemToEdit);
+        }
+        catch (HttpRequestException)
+        {
+            ModelState.AddModelError(PortadaField, GenericActionErrorMessage);
+            return View(itemToEdit);
+        }
     }
 
+    [HttpGet]
     public async Task<IActionResult> Eliminar(int id, bool? showError = false)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest();
-        }
-
-        Archivo? itemToDelete = null;
+        if (!ModelState.IsValid) return BadRequest();
 
         try
         {
-            itemToDelete = await archivos.GetAsync(id);
+            var itemToDelete = await archivos.GetAsync(id);
             if (itemToDelete == null) return NotFound();
 
             if (showError.GetValueOrDefault())
                 ViewData["ErrorMessage"] = GenericActionErrorMessage;
+
+            ViewBag.Url = configuration[UrlWebApiKey] ?? configuration[UrlWebApiFallbackKey];
+            return View(itemToDelete);
         }
         catch (HttpRequestException ex)
         {
-            if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                return RedirectToAction(SalirAction, AuthController);
+            return ex.StatusCode == System.Net.HttpStatusCode.Unauthorized
+                ? RedirectToAction(SalirAction, AuthController)
+                : NotFound();
         }
-
-        ViewBag.Url = configuration[UrlWebApiKey] ?? configuration[UrlWebApiFallbackKey];
-        return View(itemToDelete);
     }
 
     [HttpPost]
@@ -223,5 +200,22 @@ public class ArchivosController(ArchivosClientService archivos, IConfiguration c
     private static bool IsAllowedImage(string contentType)
     {
         return contentType is "image/jpeg" or "image/png" or "image/webp";
+    }
+
+    private bool ValidateImage(IFormFile file)
+    {
+        if (file.Length > MaxImageSizeBytes)
+        {
+            ModelState.AddModelError(PortadaField, "El archivo supera el tamaño máximo permitido.");
+            return false;
+        }
+
+        if (!IsAllowedImage(file.ContentType))
+        {
+            ModelState.AddModelError(PortadaField, "El archivo no es una imagen permitida.");
+            return false;
+        }
+
+        return true;
     }
 }

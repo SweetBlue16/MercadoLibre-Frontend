@@ -16,9 +16,9 @@
 @if (Model is null)
 {
     <div class="alert alert-warning" role="alert">
-        @(ViewData["ErrorMessage"] ?? "El producto solicitado no esta disponible.")
+        @(ViewData["ErrorMessage"] ?? "El producto solicitado no está disponible.")
     </div>
-    <a asp-action="Index" class="btn btn-outline-secondary btn-sm">Volver al catalogo</a>
+    <a asp-action="Index" class="btn btn-outline-secondary btn-sm">Volver al catálogo</a>
 }
 else
 {
@@ -26,7 +26,7 @@ else
         <div class="col-12 col-md-5 text-center">
             <img src="@portadaUrl"
                  alt="@Model.Titulo"
-                 onerror="@ImagenUrlHelper.FallbackOnError(Url)"
+                 data-fallback-src="@ImagenUrlHelper.Placeholder(Url)"
                  class="img-fluid border rounded bg-white p-3"
                  style="max-height: 420px; object-fit: contain;">
         </div>
@@ -48,7 +48,7 @@ else
             }
 
             <p class="text-success fw-semibold small">
-                <i class="bi bi-lightning-fill"></i> Envio gratis
+                <i class="bi bi-lightning-fill"></i> Envío gratis
             </p>
 
             <p class="mb-4">@Model.Descripcion</p>
@@ -57,7 +57,7 @@ else
                 <form asp-controller="Carrito" asp-action="Agregar" asp-route-id="@Model.ProductoId" method="post">
                     <button type="submit" class="btn btn-primary btn-sm">Agregar al carrito</button>
                 </form>
-                <a asp-action="Index" class="btn btn-outline-secondary btn-sm">Volver al catalogo</a>
+                <a asp-action="Index" class="btn btn-outline-secondary btn-sm">Volver al catálogo</a>
             </div>
         </div>
     </div>

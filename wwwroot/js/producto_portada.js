@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
 
-    const urlWebApi = (imagen.dataset.url || "").replace(/\/$/, "");
+    const urlWebApi = (imagen.dataset.url || "").replace(/\/$/, "").replace(/\/api$/i, "");
 
     function cargarImagen() {
         const archivoId = archivo.value;

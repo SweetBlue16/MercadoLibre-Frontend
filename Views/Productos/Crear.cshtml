@@ -19,7 +19,7 @@
 
 <h2 class="text-center mb-3">@ViewData["Title"] <small class="text-muted fs-5">@ViewData["SubTitle"]</small></h2>
 
-<form asp-action="Crear">
+<form asp-action="Crear" method="post">
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
     <div class="card mt-3">
         <div class="row g-0">
@@ -30,7 +30,7 @@
             <div class="col-md-8">
                 <div class="card-body small">
                     <div class="form-floating mb-3">
-                        <input asp-for="Titulo" placeholder="Titulo" class="form-control" />
+                        <input asp-for="Titulo" placeholder="Título" class="form-control" maxlength="40" />
                         <label asp-for="Titulo" class="form-label"></label>
                         <span asp-validation-for="Titulo" class="text-danger"></span>
                     </div>
@@ -44,11 +44,11 @@
                             <option value="">Producto sin portada</option>
                         </select>
                         <label asp-for="ArchivoId" class="control-label"></label>
-                        <span asp-validation-for="ArchivoId" class="text-danger" />
+                        <span asp-validation-for="ArchivoId" class="text-danger"></span>
                     </div>
                     <div class="form-floating mb-3">
-                        <textarea asp-for="Descripcion" placeholder="Poster" class="form-control form-control-sm"
-                                  style="height: 100px"></textarea>
+                        <textarea asp-for="Descripcion" placeholder="Descripción" class="form-control form-control-sm"
+                                  style="height: 100px" maxlength="40"></textarea>
                         <label asp-for="Descripcion" class="form-label"></label>
                         <span asp-validation-for="Descripcion" class="text-danger"></span>
                     </div>

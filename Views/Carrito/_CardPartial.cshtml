@@ -6,7 +6,7 @@
 <div class="card">
     <div class="row g-0 align-items-center">
         <div class="col-md-2 text-center bg-white p-2">
-            <img src="@portadaUrl" alt="@Model.Titulo" onerror="@ImagenUrlHelper.FallbackOnError(Url)" class="img-fluid" style="max-height: 120px;">
+            <img src="@portadaUrl" alt="@Model.Titulo" data-fallback-src="@ImagenUrlHelper.Placeholder(Url)" class="img-fluid" style="max-height: 120px;">
         </div>
         <div class="col-md-6">
             <div class="card-body">

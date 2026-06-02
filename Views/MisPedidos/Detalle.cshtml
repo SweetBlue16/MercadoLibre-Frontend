@@ -18,7 +18,7 @@
 <div class="card mb-3">
     <div class="card-body small">
         <div><strong>Número de pedido:</strong> @Model.PedidoId</div>
-        <div><strong>Fecha:</strong> @Model.Fecha</div>
+        <div><strong>Fecha:</strong> @Html.DisplayFor(model => model.Fecha)</div>
         <div><strong>Total:</strong> @Html.DisplayFor(model => model.Total)</div>
         <div><strong>Estado:</strong> @Model.Estado</div>
     </div>
@@ -40,7 +40,7 @@
             {
                 <tr>
                     <td width="1">
-                        <img src="@ImagenUrlHelper.Producto(Url, ViewBag.Url as string, item.Producto?.ArchivoId, item.Producto?.ImagenUrl)" alt="@item.Titulo" onerror="@ImagenUrlHelper.FallbackOnError(Url)" class="img-fluid img-thumbnail" style="max-height: 48px;">
+                        <img src="@ImagenUrlHelper.Producto(Url, ViewBag.Url as string, item.Producto?.ArchivoId, item.Producto?.ImagenUrl)" alt="@item.Titulo" data-fallback-src="@ImagenUrlHelper.Placeholder(Url)" class="img-fluid img-thumbnail" style="max-height: 48px;">
                     </td>
                     <td>@item.Titulo</td>
                     <td>@item.Cantidad</td>

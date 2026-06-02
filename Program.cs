@@ -1,10 +1,21 @@
 using frontendnet.Middlewares;
 using frontendnet.Services;
+using System.Globalization;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Localization;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var mexicoCulture = new CultureInfo("es-MX");
+CultureInfo.DefaultThreadCurrentCulture = mexicoCulture;
+CultureInfo.DefaultThreadCurrentUICulture = mexicoCulture;
+
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.AddServerHeader = false;
+});
 
 // Agregamos los servicios
 builder.Services.AddControllersWithViews(options =>
@@ -114,26 +125,26 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
 }
+
+app.UseMiddleware<SecurityHeadersMiddleware>();
+app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseRequestLocalization(new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new RequestCulture(mexicoCulture),
+    SupportedCultures = [mexicoCulture],
+    SupportedUICultures = [mexicoCulture],
+});
+
 app.UseAuthentication();
 app.UseAuthorization();
-
-app.Use(async (context, next) =>
-{
-    if (context.User.Identity?.IsAuthenticated == true)
-    {
-        context.Response.Headers.CacheControl = "no-store, no-cache, must-revalidate";
-        context.Response.Headers.Pragma = "no-cache";
-        context.Response.Headers.Expires = "0";
-    }
-
-    await next();
-});
+app.UseMiddleware<NoStoreCacheMiddleware>();
 
 app.MapControllerRoute(
     name: "default",

@@ -9,9 +9,11 @@ public class Usuario
 
     [Required(ErrorMessage = "El campo {0} es obligatorio.")]
     [EmailAddress(ErrorMessage = "El campo {0} no es correo válido.")]
+    [StringLength(40, ErrorMessage = "El campo {0} no debe exceder {1} caracteres.")]
     public required string Email { get; set; }
 
     [Required(ErrorMessage = "El campo {0} es obligatorio.")]
+    [StringLength(40, ErrorMessage = "El campo {0} no debe exceder {1} caracteres.")]
     public required string Nombre { get; set; }
 
     [Required(ErrorMessage = "El campo {0} es obligatorio.")]

@@ -5,19 +5,21 @@ namespace frontendnet.Models;
 public class UsuarioPwd
 {
     [Required(ErrorMessage = "El campo {0} es obligatorio.")]
-    [EmailAddress(ErrorMessage = "El campo {0} no es correo valido.")]
-    [Display(Name = "Correo electronico")]
+    [EmailAddress(ErrorMessage = "El campo {0} no es correo válido.")]
+    [StringLength(40, ErrorMessage = "El campo {0} no debe exceder {1} caracteres.")]
+    [Display(Name = "Correo electrónico")]
     public required string Email { get; set; }
 
     [Required(ErrorMessage = "El campo {0} es obligatorio.")]
-    [MinLength(12, ErrorMessage = "El campo {0} debe tener un minimo de {1} caracteres.")]
-    [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{12,128}$",
-        ErrorMessage = "La contraseña debe incluir mayuscula, minuscula, numero y caracter especial.")]
+    [StringLength(12, MinimumLength = 12, ErrorMessage = "El campo {0} debe tener 12 caracteres.")]
+    [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{12}$",
+        ErrorMessage = "La contraseña debe incluir mayúscula, minúscula, número y carácter especial.")]
     [DataType(DataType.Password)]
     [Display(Name = "Contraseña")]
     public required string Password { get; set; }
 
     [Required(ErrorMessage = "El campo {0} es obligatorio.")]
+    [StringLength(40, ErrorMessage = "El campo {0} no debe exceder {1} caracteres.")]
     public required string Nombre { get; set; }
 
     [Required(ErrorMessage = "El campo {0} es obligatorio.")]

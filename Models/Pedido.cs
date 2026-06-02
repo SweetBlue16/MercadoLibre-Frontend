@@ -28,6 +28,8 @@ public class DetallePedido
 public class Pedido
 {
     public int PedidoId { get; set; }
+
+    [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy HH:mm}", ApplyFormatInEditMode = false)]
     public DateTime Fecha { get; set; }
 
     [DataType(DataType.Currency)]

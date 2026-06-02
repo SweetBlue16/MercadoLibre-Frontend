@@ -75,7 +75,7 @@ public static class ApiErrorMapper
         }
 
         var code = payload?.Code ?? CodeFromStatus(response.StatusCode);
-        var message = MessageFromStatus(response.StatusCode, code);
+        var message = MessageCatalog.GetMessage(code);
         throw new ApiClientException(message, response.StatusCode, code, payload?.CorrelationId);
     }
 
@@ -89,21 +89,11 @@ public static class ApiErrorMapper
         return statusCode switch
         {
             HttpStatusCode.Unauthorized => ErrorCodeCatalog.AuthSessionExpired,
-            HttpStatusCode.Forbidden => ErrorCodeCatalog.AuthForbidden,
+            HttpStatusCode.Forbidden => ErrorCodeCatalog.Forbidden,
             HttpStatusCode.BadRequest => ErrorCodeCatalog.ValidationError,
             HttpStatusCode.NotFound => ErrorCodeCatalog.ResourceNotFound,
             HttpStatusCode.ServiceUnavailable => ErrorCodeCatalog.ServerUnavailable,
             _ => ErrorCodeCatalog.InternalError,
-        };
-    }
-
-    private static string MessageFromStatus(HttpStatusCode statusCode, string? code)
-    {
-        return statusCode switch
-        {
-            HttpStatusCode.Unauthorized => MessageCatalog.SessionExpired,
-            HttpStatusCode.Forbidden => MessageCatalog.Forbidden,
-            _ => MessageCatalog.GetMessage(code),
         };
     }
 

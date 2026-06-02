@@ -38,29 +38,25 @@
             <label class="form-label form-text">Correo confirmado</label>
             <div class="form-text text-body">@(Model.Usuario.EmailConfirmado ? "Si" : "No")</div>
         </div>
-        <div class="mb-3 ps-3">
-            <label class="form-label form-text">Tiempo restante de sesion</label>
-            <div class="form-text text-body">@Model.TiempoRestanteSesion</div>
-        </div>
     </div>
 </div>
 
 <div class="card mt-3">
     <div class="card-body">
-        <h3 class="h5">Cambiar contrasena</h3>
+        <h3 class="h5">Cambiar contraseña</h3>
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
         @if (!Model.CodigoCambioPasswordSolicitado)
         {
             <form asp-action="EnviarCodigoCambioPassword" method="post">
-                <button type="submit" class="btn btn-primary btn-sm">Enviar codigo de verificacion</button>
+                <button type="submit" class="btn btn-primary btn-sm">Enviar código de verificación</button>
             </form>
         }
         else
         {
             <form asp-action="CambiarPassword" method="post">
                 <div class="form-floating mb-3">
-                    <input asp-for="CambioPassword.Codigo" class="form-control" placeholder="Codigo" autocomplete="one-time-code">
+                    <input asp-for="CambioPassword.Codigo" class="form-control" placeholder="Código" autocomplete="one-time-code" maxlength="6" inputmode="numeric" pattern="\d{6}">
                     <label asp-for="CambioPassword.Codigo" class="form-label"></label>
                     <span asp-validation-for="CambioPassword.Codigo" class="text-danger"></span>
                 </div>
@@ -76,7 +72,7 @@
                     <label asp-for="CambioPassword.PasswordNueva" class="form-label"></label>
                     <span asp-validation-for="CambioPassword.PasswordNueva" class="text-danger"></span>
                     <div class="form-text">
-                        La contrasena debe tener al menos 12 caracteres, una mayuscula, una minuscula, un numero y un caracter especial.
+                        La contraseña debe tener 12 caracteres, una mayúscula, una minúscula, un número y un carácter especial.
                     </div>
                 </div>
 
@@ -86,7 +82,7 @@
                     <span asp-validation-for="CambioPassword.ConfirmPassword" class="text-danger"></span>
                 </div>
 
-                <button type="submit" class="btn btn-primary btn-sm">Cambiar contrasena</button>
+                <button type="submit" class="btn btn-primary btn-sm">Cambiar contraseña</button>
             </form>
         }
     </div>
