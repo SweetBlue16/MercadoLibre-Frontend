@@ -4,16 +4,19 @@ namespace frontendnet.Models;
 
 public class Producto
 {
+    public const int TextMaxLength = 40;
+    public const int DescripcionMaxLength = 300;
+
     [Display(Name = "Id")]
     public int? ProductoId { get; set; }
 
     [Required(ErrorMessage = "El campo {0} es obligatorio.")]
-    [StringLength(40, ErrorMessage = "El campo {0} no debe exceder {1} caracteres.")]
+    [StringLength(TextMaxLength, ErrorMessage = "El campo {0} no debe exceder {1} caracteres.")]
     [Display(Name = "Título")]
     public string Titulo { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "El campo {0} es obligatorio.")]
-    [StringLength(40, ErrorMessage = "El campo {0} no debe exceder {1} caracteres.")]
+    [StringLength(DescripcionMaxLength, ErrorMessage = "El campo {0} no debe exceder {1} caracteres.")]
     [DataType(DataType.MultilineText)]
     [Display(Name = "Descripción")]
     public string Descripcion { get; set; } = "Sin descripción";

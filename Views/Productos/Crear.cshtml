@@ -30,7 +30,7 @@
             <div class="col-md-8">
                 <div class="card-body small">
                     <div class="form-floating mb-3">
-                        <input asp-for="Titulo" placeholder="Título" class="form-control" maxlength="40" />
+                        <input asp-for="Titulo" placeholder="Título" class="form-control" maxlength="@Producto.TextMaxLength" />
                         <label asp-for="Titulo" class="form-label"></label>
                         <span asp-validation-for="Titulo" class="text-danger"></span>
                     </div>
@@ -48,7 +48,7 @@
                     </div>
                     <div class="form-floating mb-3">
                         <textarea asp-for="Descripcion" placeholder="Descripción" class="form-control form-control-sm"
-                                  style="height: 100px" maxlength="40"></textarea>
+                                  style="height: 100px" maxlength="@Producto.DescripcionMaxLength"></textarea>
                         <label asp-for="Descripcion" class="form-label"></label>
                         <span asp-validation-for="Descripcion" class="text-danger"></span>
                     </div>
