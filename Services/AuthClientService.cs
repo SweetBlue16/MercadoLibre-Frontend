@@ -68,31 +68,35 @@ public class AuthClientService(HttpClient client, IHttpContextAccessor httpConte
     }
 
     public async Task CerrarSesionAsync()
+{
+    if (httpContextAccessor.HttpContext is null) return;
+
+    var token = httpContextAccessor.HttpContext.User.FindFirstValue("jwt");
+
+    if (!string.IsNullOrWhiteSpace(token))
     {
-        if (httpContextAccessor.HttpContext is null) return;
-
-        var token = httpContextAccessor.HttpContext.User.FindFirstValue("jwt");
-        if (!string.IsNullOrWhiteSpace(token))
+        try
         {
-            try
-            {
-                using var request = new HttpRequestMessage(HttpMethod.Post, "api/auth/logout");
-                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-                using var response = await client.SendAsync(request);
-            }
-            catch
-            {
-                // El cierre local debe completarse aunque el API no este disponible.
-            }
+            using var request = new HttpRequestMessage(HttpMethod.Post, "api/auth/logout");
+            request.Headers.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+            using var response = await client.SendAsync(request);
         }
-
-        await httpContextAccessor.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        httpContextAccessor.HttpContext.Response.Cookies.Delete(".frontendnet", new CookieOptions
+        catch
         {
-            Path = "/",
-            HttpOnly = true,
-            SameSite = SameSiteMode.Lax,
-            Secure = httpContextAccessor.HttpContext.Request.IsHttps,
-        });
+            // El cierre local debe completarse aunque el API no este disponible.
+        }
     }
+
+    await httpContextAccessor.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+    httpContextAccessor.HttpContext.Response.Cookies.Delete(".frontendnet", new CookieOptions
+    {
+        Path = "/",
+        HttpOnly = true,
+        SameSite = SameSiteMode.Lax,
+        Secure = true,
+    });
+}
 }
